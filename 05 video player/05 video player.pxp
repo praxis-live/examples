@@ -1,0 +1,8 @@
+
+# <<<BUILD>>>
+include [file "video.pxr"]
+include [file "gui.pxr"]
+
+# <<<RUN>>>
+include [file "config/video_autostart"]
+include [file "config/gui_autostart"]

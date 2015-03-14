@@ -1,0 +1,99 @@
+@ /video root:video {
+  .width 400
+  .height 600
+  .fps 15.0
+  @ ./screen video:output {
+    #%graph.x 1648
+    #%graph.y 349
+  }
+  @ ./image video:still {
+    #%graph.x 203
+    #%graph.y 348
+    .image [file "resources/faces/face027.jpg"]
+  }
+  @ ./files core:array:random {
+    #%graph.x 14
+    #%graph.y 555
+    .values [file-list [file "resources/faces/"]]
+  }
+  @ ./snap video:snapshot {
+    #%graph.x 1040
+    #%graph.y 130
+    .fade-time 5.0
+    .mix 0.4160353836737978
+  }
+  @ ./splitter video:splitter {
+    #%graph.x 1254
+    #%graph.y 149
+  }
+  @ ./composite video:mix:composite {
+    #%graph.x 693
+    #%graph.y 324
+    .mix 1.0
+  }
+  @ ./mixAmount core:math:random {
+    #%graph.x 383
+    #%graph.y 67
+    .minimum 0.4
+    .range 0.25
+  }
+  @ ./composeType core:array:random {
+    #%graph.x 409
+    #%graph.y 527
+    .values {\{Normal\} \{Normal\} \{Normal\} \{Difference\} \{Difference\}}
+  }
+  @ ./mask video:still {
+    #%graph.x 205
+    #%graph.y 138
+    .image [file "resources/mask/mask.jpg"]
+  }
+  @ ./mask-mixer video:mix:composite {
+    #%graph.x 379
+    #%graph.y 204
+    .mode Sub
+    .mix 1.0
+  }
+  @ ./timer core:timing:timer {
+    #%graph.x -133
+    #%graph.y 314
+    .period 20.0
+  }
+  @ ./rip-splitter video:splitter {
+    #%graph.x 874
+    #%graph.y 361
+  }
+  @ ./rip-snap video:snapshot {
+    #%graph.x 1060
+    #%graph.y 406
+    .fade-time 1.0
+  }
+  @ ./difference video:time-fx:difference {
+    #%graph.x 1248
+    #%graph.y 426
+  }
+  @ ./ripple video:time-fx:ripple {
+    #%graph.x 1470
+    #%graph.y 312
+  }
+  ~ ./ripple!out ./screen!in
+  ~ ./splitter!out-1 ./ripple!in
+  ~ ./splitter!out-2 ./composite!in
+  ~ ./snap!out ./splitter!in
+  ~ ./rip-splitter!out-1 ./snap!in
+  ~ ./composite!out ./rip-splitter!in
+  ~ ./mask-mixer!out ./composite!src
+  ~ ./image!out ./mask-mixer!in
+  ~ ./mask!out ./mask-mixer!src
+  ~ ./difference!out ./ripple!disturbance
+  ~ ./rip-snap!out ./difference!in
+  ~ ./rip-splitter!out-2 ./rip-snap!in
+  ~ ./timer!out ./mixAmount!trigger
+  ~ ./timer!out ./files!trigger
+  ~ ./timer!out ./composeType!trigger
+  ~ ./mixAmount!out ./snap!mix
+  ~ ./composeType!out ./composite!mode
+  ~ ./image!ready ./snap!trigger
+  ~ ./image!ready ./rip-snap!trigger
+  ~ ./image!error ./files!trigger
+  ~ ./files!out ./image!image
+}

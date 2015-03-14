@@ -1,0 +1,311 @@
+@ /gui root:gui {
+  @ ./loopers gui:tabs {
+    @ ./ch1 gui:panel {
+      .label "Ch 1"
+      @ ./play gui:togglebutton {
+        .label Play
+        .binding /audio/sampler-ch1.playing
+      }
+      @ ./record gui:togglebutton {
+        .label Record
+        .binding /audio/sampler-ch1.recording
+      }
+      @ ./range gui:h-rangeslider {
+        .label "In Out"
+        .binding /audio/sampler-ch1.range
+        .layout "span, wrap"
+      }
+      @ ./pitch gui:v-slider {
+        .label Pitch
+        .binding /audio/sampler-ch1.speed
+        .minimum 0
+        .maximum 2
+      }
+      @ ./drive gui:v-slider {
+        .label Drive
+        .binding /audio/od-ch1.mix
+      }
+      @ ./filter gui:xy-pad {
+        .label "Filter (Freq / Res)"
+        .binding-x /audio/filter-ch1.frequency
+        .binding-y /audio/filter-ch1.resonance
+      }
+      @ ./loop-mix gui:v-slider {
+        .label "Loop Mix"
+        .binding /audio/xfader-ch1.mix
+      }
+      @ ./feedback gui:v-slider {
+        .label "DL Fdbk"
+        .binding /audio/feedback-ch1.value
+        .minimum 0
+        .maximum 0.9
+        .layout wrap
+      }
+      @ ./pitch-reset gui:button {
+        .label Reset
+        .binding /audio/sampler-ch1.speed
+        .values {\{1\}}
+      }
+      @ ./filter-sw gui:togglebutton {
+        .label Filter
+        .binding /audio/filter-ch1.mix
+        .on-value 1
+        .off-value 0
+        .layout skip
+      }
+      @ ./loop-rec gui:togglebutton {
+        .label "Loop Record"
+        .binding /audio/looper-ch1.recording
+      }
+      @ ./delay-sw gui:togglebutton {
+        .label Delay
+        .binding /audio/delay-mix-ch1.value
+        .on-value 0.5
+        .off-value 0
+      }
+    }
+    @ ./ch2 gui:panel {
+      .label "Ch 2"
+      @ ./play gui:togglebutton {
+        .label Play
+        .binding /audio/sampler-ch2.playing
+      }
+      @ ./record gui:togglebutton {
+        .label Record
+        .binding /audio/sampler-ch2.recording
+      }
+      @ ./range gui:h-rangeslider {
+        .label "In Out"
+        .binding /audio/sampler-ch2.range
+        .layout "span, wrap"
+      }
+      @ ./pitch gui:v-slider {
+        .label Pitch
+        .binding /audio/sampler-ch2.speed
+        .minimum 0
+        .maximum 2
+      }
+      @ ./drive gui:v-slider {
+        .label Drive
+        .binding /audio/od-ch2.mix
+      }
+      @ ./filter gui:xy-pad {
+        .label "Filter (Freq / Res)"
+        .binding-x /audio/filter-ch2.frequency
+        .binding-y /audio/filter-ch2.resonance
+      }
+      @ ./loop-mix gui:v-slider {
+        .label "Loop Mix"
+        .binding /audio/xfader-ch2.mix
+      }
+      @ ./feedback gui:v-slider {
+        .label "DL Fdbk"
+        .binding /audio/feedback-ch2.value
+        .minimum 0
+        .maximum 0.9
+        .layout wrap
+      }
+      @ ./pitch-reset gui:button {
+        .label Reset
+        .binding /audio/sampler-ch2.speed
+        .values {\{1\}}
+      }
+      @ ./filter-sw gui:togglebutton {
+        .label Filter
+        .binding /audio/filter-ch2.mix
+        .on-value 1
+        .off-value 0
+        .layout skip
+      }
+      @ ./loop-rec gui:togglebutton {
+        .label "Loop Record"
+        .binding /audio/looper-ch2.recording
+      }
+      @ ./delay-sw gui:togglebutton {
+        .label Delay
+        .binding /audio/delay-mix-ch2.value
+        .on-value 0.5
+        .off-value 0
+      }
+    }
+    @ ./ch3 gui:panel {
+      .label "Ch 3"
+      @ ./play gui:togglebutton {
+        .label Play
+        .binding /audio/sampler-ch3.playing
+      }
+      @ ./record gui:togglebutton {
+        .label Record
+        .binding /audio/sampler-ch3.recording
+      }
+      @ ./range gui:h-rangeslider {
+        .label "In Out"
+        .binding /audio/sampler-ch3.range
+        .layout "span, wrap"
+      }
+      @ ./pitch gui:v-slider {
+        .label Pitch
+        .binding /audio/sampler-ch3.speed
+        .minimum 0
+        .maximum 2
+      }
+      @ ./drive gui:v-slider {
+        .label Drive
+        .binding /audio/od-ch3.mix
+      }
+      @ ./filter gui:xy-pad {
+        .label "Filter (Freq / Res)"
+        .binding-x /audio/filter-ch3.frequency
+        .binding-y /audio/filter-ch3.resonance
+      }
+      @ ./loop-mix gui:v-slider {
+        .label "Loop Mix"
+        .binding /audio/xfader-ch3.mix
+      }
+      @ ./feedback gui:v-slider {
+        .label "DL Fdbk"
+        .binding /audio/feedback-ch3.value
+        .minimum 0
+        .maximum 0.9
+        .layout wrap
+      }
+      @ ./pitch-reset gui:button {
+        .label Reset
+        .binding /audio/sampler-ch3.speed
+        .values {\{1\}}
+      }
+      @ ./filter-sw gui:togglebutton {
+        .label Filter
+        .binding /audio/filter-ch3.mix
+        .on-value 1
+        .off-value 0
+        .layout skip
+      }
+      @ ./loop-rec gui:togglebutton {
+        .label "Loop Record"
+        .binding /audio/looper-ch3.recording
+      }
+      @ ./delay-sw gui:togglebutton {
+        .label Delay
+        .binding /audio/delay-mix-ch3.value
+        .on-value 0.5
+        .off-value 0
+      }
+    }
+    @ ./ch4 gui:panel {
+      .label "Ch 4"
+      @ ./play gui:togglebutton {
+        .label Play
+        .binding /audio/sampler-ch4.playing
+      }
+      @ ./record gui:togglebutton {
+        .label Record
+        .binding /audio/sampler-ch4.recording
+      }
+      @ ./range gui:h-rangeslider {
+        .label "In Out"
+        .binding /audio/sampler-ch4.range
+        .layout "span, wrap"
+      }
+      @ ./pitch gui:v-slider {
+        .label Pitch
+        .binding /audio/sampler-ch4.speed
+        .minimum 0
+        .maximum 2
+      }
+      @ ./drive gui:v-slider {
+        .label Drive
+        .binding /audio/od-ch4.mix
+      }
+      @ ./filter gui:xy-pad {
+        .label "Filter (Freq / Res)"
+        .binding-x /audio/filter-ch4.frequency
+        .binding-y /audio/filter-ch4.resonance
+      }
+      @ ./loop-mix gui:v-slider {
+        .label "Loop Mix"
+        .binding /audio/xfader-ch4.mix
+      }
+      @ ./feedback gui:v-slider {
+        .label "DL Fdbk"
+        .binding /audio/feedback-ch4.value
+        .minimum 0
+        .maximum 0.9
+        .layout wrap
+      }
+      @ ./pitch-reset gui:button {
+        .label Reset
+        .binding /audio/sampler-ch4.speed
+        .values {\{1\}}
+      }
+      @ ./filter-sw gui:togglebutton {
+        .label Filter
+        .binding /audio/filter-ch4.mix
+        .on-value 1
+        .off-value 0
+        .layout skip
+      }
+      @ ./loop-rec gui:togglebutton {
+        .label "Loop Record"
+        .binding /audio/looper-ch4.recording
+      }
+      @ ./delay-sw gui:togglebutton {
+        .label Delay
+        .binding /audio/delay-mix-ch4.value
+        .on-value 0.5
+        .off-value 0
+      }
+    }
+  }
+  @ ./mixer gui:panel {
+    @ ./mute-1 gui:togglebutton {
+      .label "Mute 1"
+      .binding /audio/mute-ch1.level
+      .on-value 0
+      .off-value 1
+    }
+    @ ./mute-2 gui:togglebutton {
+      .label "Mute 2"
+      .binding /audio/mute-ch2.level
+      .on-value 0
+      .off-value 1
+    }
+    @ ./mute-3 gui:togglebutton {
+      .label "Mute 3"
+      .binding /audio/mute-ch3.level
+      .on-value 0
+      .off-value 1
+    }
+    @ ./mute-4 gui:togglebutton {
+      .label "Mute 4"
+      .binding /audio/mute-ch4.level
+      .on-value 0
+      .off-value 1
+      .layout wrap
+    }
+    @ ./volume-1 gui:v-slider {
+      .label "Volume 1"
+      .binding /audio/gain-ch1.value
+      .minimum 0
+      .maximum 1.5
+    }
+    @ ./volume-2 gui:v-slider {
+      .label "Volume 2"
+      .binding /audio/gain-ch2.value
+      .minimum 0
+      .maximum 1.5
+    }
+    @ ./volume-3 gui:v-slider {
+      .label "Volume 3"
+      .binding /audio/gain-ch3.value
+      .minimum 0
+      .maximum 1.5
+    }
+    @ ./volume-4 gui:v-slider {
+      .label "Volume 4"
+      .binding /audio/gain-ch4.value
+      .minimum 0
+      .maximum 1.5
+    }
+  }
+}

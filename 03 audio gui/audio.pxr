@@ -1,0 +1,70 @@
+@ /audio root:audio {
+  @ ./beat audio:sampleplayer {
+    #%graph.x 209
+    #%graph.y 14
+    .sample [file "resources/audio/beat.wav"]
+    .loop true
+  }
+  @ ./fx1 audio:sampleplayer {
+    #%graph.x 23
+    #%graph.y 198
+    .sample [file "resources/audio/stab1.wav"]
+  }
+  @ ./fx2 audio:sampleplayer {
+    #%graph.x 158
+    #%graph.y 259
+    .sample [file "resources/audio/stab2.wav"]
+  }
+  @ ./fx3 audio:sampleplayer {
+    #%graph.x 283
+    #%graph.y 328
+    .sample [file "resources/audio/drone1.wav"]
+  }
+  @ ./fx4 audio:sampleplayer {
+    #%graph.x 414
+    #%graph.y 398
+    .sample [file "resources/audio/drone2.wav"]
+  }
+  @ ./fx-gain audio:gain {
+    #%graph.x 734
+    #%graph.y 218
+    .level 0.30000001192092896
+  }
+  @ ./beat-gain audio:gain {
+    #%graph.x 794
+    #%graph.y 52
+    .level 0.5
+  }
+  @ ./overdrive audio:distortion:overdrive {
+    #%graph.x 575
+    #%graph.y 32
+    .mix 1.0
+  }
+  @ ./filter audio:filter:iir {
+    #%graph.x 395
+    #%graph.y 34
+    .type LP12
+    .frequency 20000.0
+    .mix 1.0
+  }
+  @ ./output audio:output {
+    #%graph.x 1055
+    #%graph.y 169
+  }
+  @ ./start core:start-trigger {
+    #%graph.x 22
+    #%graph.y 41
+  }
+  ~ ./beat!out ./filter!in
+  ~ ./filter!out ./overdrive!in
+  ~ ./overdrive!out ./beat-gain!in
+  ~ ./beat-gain!out ./output!in-1
+  ~ ./beat-gain!out ./output!in-2
+  ~ ./fx1!out ./fx-gain!in
+  ~ ./fx2!out ./fx-gain!in
+  ~ ./fx3!out ./fx-gain!in
+  ~ ./fx4!out ./fx-gain!in
+  ~ ./fx-gain!out ./output!in-1
+  ~ ./fx-gain!out ./output!in-2
+  ~ ./start!out ./beat!play
+}

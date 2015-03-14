@@ -1,0 +1,21 @@
+@ /video root:video {
+  #%autostart true
+  .width 400
+  .height 300
+  .fps 20.0
+  @ ./screen video:output {
+    #%graph.x 562
+    #%graph.y 158
+  }
+  @ ./image video:still {
+    #%graph.x 318
+    #%graph.y 159
+    .image [file "resources/hello world.png"]
+  }
+  @ ./noise video:source:noise {
+    #%graph.x 98
+    #%graph.y 152
+  }
+  ~ ./image!out ./screen!in
+  ~ ./noise!out ./image!in
+}
