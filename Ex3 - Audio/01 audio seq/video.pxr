@@ -1,0 +1,50 @@
+@ /video root:video {
+  #%pxr.format 2
+  #%pxr.format 2
+  @ ./output1 video:output {
+    #%graph.x 383
+    #%graph.y 238
+  }
+  @ ./blur1 video:fx:blur {
+    #%graph.x 360
+    #%graph.y 106
+    .radius 5
+  }
+  @ ./custom1 video:custom {
+    #%graph.x 102
+    #%graph.y 160
+    .code "
+
+    @P(1)
+    @Type.Number(min = 0, max = 1)
+    @Transient
+    double level1;
+    @P(2)
+    @Type.Number(min = 0, max = 1)
+    @Transient
+    double level2;
+
+    @In(1)
+    PImage in;
+
+    @Override
+    public void draw() \{
+        copy(in);
+        release(in);
+        noStroke();
+        fill(255, level1 * 200, 255);
+        blendMode(DIFFERENCE);
+        double dim = level1 * height / 2;
+        rect((width / 2) - dim, (height / 2) - (dim / 2),
+                dim * 2, dim);
+        dim = level2 * height;
+        fill(0, 100, level2 * 240);
+        rect((width / 2) - (dim / 2), (height / 2) - (dim),
+                dim, dim * 2);
+    \}
+"
+  }
+  ~ ./custom1!out ./blur1!in
+  ~ ./blur1!out ./custom1!in
+  ~ ./custom1!out ./output1!in
+}

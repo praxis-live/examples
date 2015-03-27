@@ -1,0 +1,176 @@
+@ /video root:video {
+  #%pxr.format 2
+  .renderer OpenGL
+  .width 800
+  .height 600
+  @ ./cylinder video:gl:p3d {
+    #%graph.x 431
+    #%graph.y 259
+    .code "
+
+    @In(1)
+    PImage in;
+    @P(1)
+    @Type.Number(min = 0, max = 1, def = 0.5)
+    Property x;
+    @P(2)
+    @Type.Number(min = 0, max = 1, def = 0.5)
+    Property y;
+
+    int tubeRes = 32;
+    double\[\] tubeX = new double\[tubeRes\];
+    double\[\] tubeY = new double\[tubeRes\];
+
+    @Override
+    public void setup() \{
+        double angle = 270.0 / tubeRes;
+        for (int i = 0; i < tubeRes; i++) \{
+            tubeX\[i\] = cos(radians(i * angle));
+            tubeY\[i\] = sin(radians(i * angle));
+        \}
+        noStroke();
+    \}
+
+    @Override
+    public void draw() \{
+
+        translate(width / 2, height / 2);
+        scale(1.5);
+        rotateX(map(d(x), 0, 1, -PI, PI));
+        rotateY(map(d(y), 0, 1, -PI, PI));
+        beginShape(QUAD_STRIP);
+        texture(in);
+        for (int i = 0; i < tubeRes; i++) \{
+            double x = tubeX\[i\] * 100;
+            double z = tubeY\[i\] * 100;
+            double u = in.width - (in.width / tubeRes * i);
+            vertex(x, -100, z, u, 0);
+            vertex(x, 100, z, u, in.height);
+        \}
+        endShape();
+        beginShape(QUADS);
+        texture(in);
+        vertex(0, -100, 0, 0, 0);
+        vertex(100, -100, 0, 100, 0);
+        vertex(100, 100, 0, 100, 100);
+        vertex(0, 100, 0, 0, 100);
+        endShape();
+    \}
+"
+    .x 0.5585268910082662
+    .y 0.4425453118126925
+  }
+  @ ./output video:output {
+    #%graph.x 667
+    #%graph.y 279
+    .always-on-top true
+  }
+  @ ./animator core:custom {
+    #%graph.x 62
+    #%graph.y 291
+    .code "
+
+    @P(1) @Port(false) Property x;
+    @P(2) @Port(false) Property y;
+    
+    @Out(1) Output x_pos;
+    @Out(2) Output y_pos;
+    
+public void setup() \{
+  
+\}
+
+public void update() \{
+    if (!x.isAnimating()) \{
+        x.to(random(0,1)).in(5).easeInOut();
+        y.to(random(0.25,0.75)).in(5).easeInOut();
+    \}
+    
+    x_pos.send(d(x));
+    y_pos.send(d(y));
+
+\}
+"
+    .x 0.513641977482697
+    .y 0.4425453118126925
+  }
+  @ ./smoky video:gl:p3d {
+    #%graph.x 201
+    #%graph.y 204
+    .code "
+
+     @P(1) @ReadOnly Property time;
+    
+    void updateUniforms() \{
+        if (!time.isAnimating()) \{
+            time.set(0).to(86400).in(86400);
+        \}
+        shader.set(\"time\", d(time));
+    \}
+
+    
+    // BOILERPLATE BELOW
+    @In(0)
+    PImage in;
+    @P(0)
+    @Type.String(mime = GLSL_FRAGMENT_MIME, template = DEFAULT_FRAGMENT_SHADER)
+    @OnChange(\"updateShader\")
+    @Port(false)
+    String fragment;
+
+    PShader shader;
+
+    @Override
+    public void setup() \{
+        updateShader();
+    \}
+
+    @Override
+    public void draw() \{
+        if (shader == null) \{
+            shader = createShader(DEFAULT_VERTEX_SHADER,
+                    fragment.isEmpty() ? DEFAULT_FRAGMENT_SHADER : fragment);
+        \}
+        shader(shader);
+        updateUniforms();
+        image(in, 0, 0);
+        resetShader();
+    \}
+
+    void updateShader() \{
+        shader = null;
+    \}
+
+"
+    .fragment "varying vec4 vertTexCoord;
+uniform sampler2D texture;
+
+// water turbulence effect by joltz0r 2013-07-04, improved 2013-07-07
+// Altered
+
+uniform float time;
+
+#define MAX_ITER 8
+void main( void ) \{
+  vec2 p = (vertTexCoord.st - 0.5) * 10.0;
+  vec2 i = p;
+  float c = 2.0;
+  float inten = 0.5;
+
+  for (int n = 0; n < MAX_ITER; n++) \{
+    float t = (time * 0.2) * (1.0 - (1.0 / float(n+1)));
+    i = p + vec2(cos(t - i.x) + sin(t + i.y), sin(t - i.y) + cos(t + i.x));
+    c += 1.0/length(vec2(p.x / (sin(i.x+t)/inten),p.y / (cos(i.y+t)/inten)));
+  \}
+  c /= float(MAX_ITER);
+  float pulse = abs(sin(time*.1));
+  float pulse2 = pulse;
+  float pulse3 = pow(sin(time*2.),2.);
+  gl_FragColor = vec4(vec3(pow(c,1.5+pulse/2.))*vec3(1.0+pulse2, 2.0-pulse, 1.5+pulse3)*(1.+pulse)/2., 1.0);
+\}"
+  }
+  ~ ./cylinder!out ./output!in
+  ~ ./animator!x-pos ./cylinder!x
+  ~ ./animator!y-pos ./cylinder!y
+  ~ ./smoky!out ./cylinder!in
+}

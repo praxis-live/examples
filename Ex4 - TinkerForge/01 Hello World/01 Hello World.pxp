@@ -1,0 +1,6 @@
+
+# <<<BUILD>>>
+include [file "tinkerforge.pxr"]
+
+# <<<RUN>>>
+include [file "config/tinkerforge_autostart"]

@@ -1,0 +1,54 @@
+@ /audio root:audio {
+  #%pxr.format 2
+  @ ./output1 audio:output {
+    #%graph.x 619
+    #%graph.y 157
+  }
+  @ ./level1 audio:analysis:level {
+    #%graph.x 259
+    #%graph.y 33
+  }
+  @ ./player1 audio:sampling:player {
+    #%graph.x 57
+    #%graph.y 101
+    .sample [file "resources/audio/water drops ster eff.wav"]
+    .loop true
+  }
+  @ ./level2 audio:analysis:level {
+    #%graph.x 259
+    #%graph.y 115
+  }
+  @ ./send1 core:routing:send {
+    #%graph.x 592
+    #%graph.y 243
+    .address /tinkerforge/left.value
+  }
+  @ ./send2 core:routing:send {
+    #%graph.x 589
+    #%graph.y 372
+    .address /tinkerforge/right.value
+  }
+  @ ./start-trigger1 core:start-trigger {
+    #%graph.x 26
+    #%graph.y 31
+  }
+  @ ./scale1 core:math:scale {
+    #%graph.x 437
+    #%graph.y 223
+    .x2 0.5
+  }
+  @ ./scale2 core:math:scale {
+    #%graph.x 411
+    #%graph.y 346
+    .x2 0.5
+  }
+  ~ ./level1!out ./output1!in-1
+  ~ ./level2!out ./output1!in-2
+  ~ ./level1!in ./player1!out-1
+  ~ ./player1!out-2 ./level2!in
+  ~ ./start-trigger1!out ./player1!play
+  ~ ./scale2!out ./send2!in
+  ~ ./scale1!out ./send1!in
+  ~ ./scale1!in ./level1!level
+  ~ ./level2!level ./scale2!in
+}

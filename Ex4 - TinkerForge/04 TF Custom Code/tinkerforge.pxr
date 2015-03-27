@@ -1,0 +1,85 @@
+@ /tinkerforge root:tinkerforge {
+  #%pxr.format 2
+  @ ./lcd20x4-1 tinkerforge:lcd20x4 {
+    #%graph.x 536
+    #%graph.y 102
+    .uid "<auto>"
+    .backlight true
+  }
+  @ ./custom1 core:custom {
+    #%graph.x 249
+    #%graph.y 64
+    .code "
+   
+    @P(1) @Type.Number(min = 0, max = 1) @ReadOnly
+    Property level;
+    
+    @Out(1) Output out;
+    
+    String BASE = \"------======****####\";
+    int length;
+
+    @Override
+    public void update() \{
+        int len = (int) (d(level) * 20);
+        if (length != len) \{
+            length = len;
+            out.send(BASE.substring(0, len));
+        \}
+    \}
+    
+    @In(1) void in(double value) \{
+        value = max(0,min(value,1));
+        if (value > d(level)) \{
+            level.set(value).to(0).in(1).easeOut();
+        \}
+    \}
+"
+  }
+  @ ./custom2 core:custom {
+    #%graph.x 248
+    #%graph.y 162
+    .code "
+   
+    @P(1) @Type.Number(min = 0, max = 1) @ReadOnly
+    Property level;
+    
+    @Out(1) Output out;
+    
+    String BASE = \"------======****####\";
+    int length;
+
+    @Override
+    public void update() \{
+        int len = (int) (d(level) * 20);
+        if (length != len) \{
+            length = len;
+            out.send(BASE.substring(0, len));
+        \}
+    \}
+    
+    @In(1) void in(double value) \{
+        value = max(0,min(value,1));
+        if (value > d(level)) \{
+            level.set(value).to(0).in(1).easeOut();
+        \}
+    \}
+"
+  }
+  @ ./left core:property {
+    #%graph.x 82
+    #%graph.y 64
+    .value 0.19288789722725505
+  }
+  @ ./right core:property {
+    #%graph.x 84
+    #%graph.y 161
+    .value 0.09407366665732046
+  }
+  ~ ./custom1!out ./lcd20x4-1!line-1
+  ~ ./custom1!out ./lcd20x4-1!line-2
+  ~ ./custom2!out ./lcd20x4-1!line-3
+  ~ ./custom2!out ./lcd20x4-1!line-4
+  ~ ./left!out ./custom1!in
+  ~ ./right!out ./custom2!in
+}

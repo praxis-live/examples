@@ -1,0 +1,8 @@
+
+# <<<BUILD>>>
+include [file "tinkerforge.pxr"]
+include [file "audio.pxr"]
+
+# <<<RUN>>>
+include [file "config/tinkerforge_autostart"]
+include [file "config/audio_autostart"]

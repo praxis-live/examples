@@ -1,0 +1,38 @@
+@ /video root:video {
+  #%pxr.format 2
+  #%pxr.format 2
+  .width 400
+  .height 300
+  .fps 20.0
+  @ ./screen video:output {
+    #%graph.x 784
+    #%graph.y 210
+    .always-on-top true
+  }
+  @ ./image video:still {
+    #%graph.x 427
+    #%graph.y 173
+    .image [file "resources/images/1.jpg"]
+  }
+  @ ./snap video:snapshot {
+    #%graph.x 619
+    #%graph.y 179
+    .fade-time 4.5
+  }
+  @ ./timer core:timing:timer {
+    #%graph.x 73
+    #%graph.y 140
+    .period 5
+  }
+  @ ./files core:array:iterator {
+    #%graph.x 245
+    #%graph.y 156
+    .values [file-list [file "resources/images/"]]
+  }
+  ~ ./image!ready ./snap!trigger
+  ~ ./snap!out ./screen!in
+  ~ ./image!out ./snap!in
+  ~ ./timer!out ./files!trigger
+  ~ ./files!out ./image!image
+  ~ ./image!error ./files!trigger
+}

@@ -1,0 +1,63 @@
+@ /tinkerforge root:tinkerforge {
+  @ ./lcd20x4-1 tinkerforge:lcd20x4 {
+    #%graph.x 207
+    #%graph.y 156
+    .uid "<auto>"
+    .line-2 "Hello World!"
+    .backlight true
+    .button-mode Signal
+  }
+  @ ./hel-send core:routing:send {
+    #%graph.x 540
+    #%graph.y 70
+    .address /audio/hel.play
+  }
+  @ ./lo-send core:routing:send {
+    #%graph.x 539
+    #%graph.y 118
+    .address /audio/lo.play
+  }
+  @ ./world-send core:routing:send {
+    #%graph.x 538
+    #%graph.y 164
+    .address /audio/world.play
+  }
+  @ ./hel core:variable {
+    #%graph.x 46
+    #%graph.y 154
+    .value HEL
+  }
+  @ ./lo core:variable {
+    #%graph.x 50
+    #%graph.y 233
+    .value "   LO"
+  }
+  @ ./world core:variable {
+    #%graph.x 47
+    #%graph.y 351
+    .value "      WORLD"
+  }
+  @ ./clear core:variable {
+    #%graph.x 234
+    #%graph.y 444
+  }
+  @ ./delay1 core:timing:delay {
+    #%graph.x 601
+    #%graph.y 295
+    .time 0.3
+  }
+  ~ ./lcd20x4-1!button-1 ./hel-send!in
+  ~ ./lcd20x4-1!button-2 ./lo-send!in
+  ~ ./lcd20x4-1!button-3 ./world-send!in
+  ~ ./lcd20x4-1!button-1 ./hel!trigger
+  ~ ./lcd20x4-1!button-2 ./lo!trigger
+  ~ ./lcd20x4-1!button-1 ./delay1!in
+  ~ ./lcd20x4-1!button-2 ./delay1!in
+  ~ ./lcd20x4-1!button-3 ./delay1!in
+  ~ ./delay1!out ./clear!trigger
+  ~ ./lcd20x4-1!button-3 ./world!trigger
+  ~ ./hel!out ./lcd20x4-1!line-3
+  ~ ./lo!out ./lcd20x4-1!line-3
+  ~ ./world!out ./lcd20x4-1!line-3
+  ~ ./clear!out ./lcd20x4-1!line-3
+}

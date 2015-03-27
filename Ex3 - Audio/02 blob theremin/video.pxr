@@ -1,0 +1,86 @@
+@ /video root:video {
+  #%pxr.format 2
+  .fps 15.0
+  @ ./output1 video:output {
+    #%graph.x 1303
+    #%graph.y 179
+  }
+  @ ./capture1 video:capture {
+    #%graph.x 395
+    #%graph.y 94
+    .device 1
+    .source-width 640
+    .source-height 480
+  }
+  @ ./start-trigger1 core:start-trigger {
+    #%graph.x 48
+    #%graph.y 93
+  }
+  @ ./snapshot1 video:snapshot {
+    #%graph.x 595
+    #%graph.y 285
+    .fade-time 5.0
+    .mix 0.05
+  }
+  @ ./difference1 video:analysis:difference {
+    #%graph.x 676
+    #%graph.y 103
+    .mode Threshold
+    .threshold 0.2
+  }
+  @ ./blob-tracker1 video:analysis:simple-tracker {
+    #%graph.x 1052
+    #%graph.y 154
+    .debug true
+  }
+  @ ./blur1 video:fx:blur {
+    #%graph.x 870
+    #%graph.y 108
+    .radius 10
+  }
+  @ ./timer1 core:timing:timer {
+    #%graph.x 477
+    #%graph.y 498
+    .period 5.0
+  }
+  @ ./mix-start core:variable {
+    #%graph.x 327
+    #%graph.y 254
+    .value 1
+  }
+  @ ./mix-delay core:timing:delay {
+    #%graph.x 118
+    #%graph.y 391
+    .time 10.0
+  }
+  @ ./mix core:variable {
+    #%graph.x 359
+    #%graph.y 384
+    .value 0.05
+  }
+  @ ./send1 core:routing:send {
+    #%graph.x 1281
+    #%graph.y 287
+    .address /audio/blobX.value
+  }
+  @ ./send2 core:routing:send {
+    #%graph.x 1262
+    #%graph.y 341
+    .address /audio/blobWidth.value
+  }
+  ~ ./start-trigger1!out ./capture1!play
+  ~ ./snapshot1!out ./difference1!in-2
+  ~ ./difference1!out ./blur1!in
+  ~ ./timer1!out ./snapshot1!trigger
+  ~ ./mix-delay!in ./start-trigger1!out
+  ~ ./mix-start!out ./snapshot1!mix
+  ~ ./start-trigger1!out ./mix-start!trigger
+  ~ ./mix-delay!out ./mix!trigger
+  ~ ./mix!out ./snapshot1!mix
+  ~ ./blob-tracker1!out ./output1!in
+  ~ ./blob-tracker1!x ./send1!in
+  ~ ./send2!in ./blob-tracker1!width
+  ~ ./capture1!out ./difference1!in-1
+  ~ ./capture1!out ./snapshot1!in
+  ~ ./blur1!out ./blob-tracker1!in
+}

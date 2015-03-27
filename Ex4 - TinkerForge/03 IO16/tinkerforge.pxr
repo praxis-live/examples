@@ -1,0 +1,20 @@
+@ /tinkerforge root:tinkerforge {
+  #%pxr.format 2
+  @ ./io16-1 tinkerforge:io16 {
+    #%graph.x 375
+    #%graph.y 108
+    .uid "<auto>"
+  }
+  @ ./timer1 core:timing:timer {
+    #%graph.x 67
+    #%graph.y 50
+    .period 0.2
+  }
+  @ ./iterator1 core:array:iterator {
+    #%graph.x 173
+    #%graph.y 135
+    .values [array 1 0]
+  }
+  ~ ./iterator1!trigger ./timer1!out
+  ~ ./iterator1!out ./io16-1!output-b7
+}

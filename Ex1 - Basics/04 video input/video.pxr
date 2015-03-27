@@ -1,0 +1,65 @@
+@ /video root:video {
+  #%pxr.format 2
+  #%pxr.format 2
+  #%autostart true
+  @ ./output video:output {
+    #%graph.x 594
+    #%graph.y 191
+    .always-on-top true
+  }
+  @ ./capture video:capture {
+    #%graph.x 226
+    #%graph.y 171
+    .device 1
+    .source-width 640
+    .source-height 480
+  }
+  @ ./start-trigger core:start-trigger {
+    #%graph.x 22
+    #%graph.y 173
+  }
+  @ ./bars video:custom {
+    #%graph.x 427
+    #%graph.y 201
+    .code "
+
+    @In(1)
+    PImage in;
+
+    @P(1)
+    @ReadOnly
+    Property bar1X;
+    @P(2)
+    @ReadOnly
+    Property bar1W;
+    @P(3)
+    @ReadOnly
+    Property bar2X;
+    @P(4)
+    @ReadOnly
+    Property bar2W;
+
+    @Override
+    public void draw() \{
+        copy(in);
+        release(in);
+        
+        if (!bar1X.isAnimating()) \{
+            bar1X.to(random(-50, width + 50)).in(4);
+            bar1W.to(random(20, 200)).in(4);
+            bar2X.to(random(-50, width + 50)).in(4);
+            bar2W.to(random(20, 200)).in(4);
+        \}
+
+        blendMode(DIFFERENCE);
+        noStroke();
+        rect(d(bar1X), 0, d(bar1W), height);
+        rect(d(bar2X), 0, d(bar2W), height);
+
+    \}
+"
+  }
+  ~ ./start-trigger!out ./capture!play
+  ~ ./bars!out ./output!in
+  ~ ./capture!out ./bars!in
+}

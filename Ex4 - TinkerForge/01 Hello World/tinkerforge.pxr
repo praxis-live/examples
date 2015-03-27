@@ -1,0 +1,16 @@
+@ /tinkerforge root:tinkerforge {
+  @ ./lcd20x4-1 tinkerforge:lcd20x4 {
+    #%graph.x 327
+    #%graph.y 34
+    .uid "<auto>"
+    .line-1 "Hello World!"
+    .line-3 -150.0
+    .backlight true
+  }
+  @ ./rotary-poti1 tinkerforge:rotary-poti {
+    #%graph.x 99
+    #%graph.y 139
+    .uid "<auto>"
+  }
+  ~ ./rotary-poti1!value ./lcd20x4-1!line-3
+}

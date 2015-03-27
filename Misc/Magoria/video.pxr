@@ -1,0 +1,91 @@
+@ /video root:video {
+  #%pxr.format 2
+  .width 400
+  .height 600
+  .fps 15.0
+  @ ./screen video:output {
+    #%graph.x 1217
+    #%graph.y 306
+    .always-on-top true
+  }
+  @ ./image video:still {
+    #%graph.x 203
+    #%graph.y 348
+    .image [file "resources/faces/face027.jpg"]
+  }
+  @ ./files core:array:random {
+    #%graph.x 71
+    #%graph.y 556
+    .values [file-list [file "resources/faces/"]]
+  }
+  @ ./snap video:snapshot {
+    #%graph.x 835
+    #%graph.y 65
+    .fade-time 5.0
+    .mix 0.4160353836737978
+  }
+  @ ./composite video:composite {
+    #%graph.x 677
+    #%graph.y 237
+    .mix 1.0
+  }
+  @ ./mixAmount core:math:random {
+    #%graph.x 383
+    #%graph.y 67
+    .minimum 0.4
+    .range 0.25
+  }
+  @ ./composeType core:array:random {
+    #%graph.x 601
+    #%graph.y 379
+    .values [array Normal Normal Normal Difference Difference]
+  }
+  @ ./mask video:still {
+    #%graph.x 127
+    #%graph.y 78
+    .image [file "resources/mask/mask.jpg"]
+  }
+  @ ./mask-mixer video:composite {
+    #%graph.x 340
+    #%graph.y 189
+    .mode Sub
+    .mix 1.0
+  }
+  @ ./timer core:timing:timer {
+    #%graph.x 10
+    #%graph.y 285
+    .period 20.0
+  }
+  @ ./rip-snap video:snapshot {
+    #%graph.x 837
+    #%graph.y 423
+    .fade-time 1.0
+  }
+  @ ./difference video:fx:difference {
+    #%graph.x 992
+    #%graph.y 435
+  }
+  @ ./ripple video:fx:ripple {
+    #%graph.x 1059
+    #%graph.y 273
+  }
+  ~ ./ripple!out ./screen!in
+  ~ ./mask-mixer!out ./composite!src
+  ~ ./image!out ./mask-mixer!in
+  ~ ./mask!out ./mask-mixer!src
+  ~ ./difference!out ./ripple!disturbance
+  ~ ./rip-snap!out ./difference!in
+  ~ ./timer!out ./mixAmount!trigger
+  ~ ./timer!out ./files!trigger
+  ~ ./timer!out ./composeType!trigger
+  ~ ./mixAmount!out ./snap!mix
+  ~ ./composeType!out ./composite!mode
+  ~ ./image!ready ./snap!trigger
+  ~ ./image!ready ./rip-snap!trigger
+  ~ ./image!error ./files!trigger
+  ~ ./files!out ./image!image
+  ~ ./snap!out ./ripple!in
+  ~ ./snap!out ./composite!in
+  ~ ./composite!out ./rip-snap!in
+  ~ ./composite!out ./snap!in
+}

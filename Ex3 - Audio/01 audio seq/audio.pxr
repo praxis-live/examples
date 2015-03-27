@@ -1,0 +1,335 @@
+@ /audio root:audio {
+  #%pxr.format 2
+  #%pxr.format 2
+  @ ./output1 audio:output {
+    #%graph.x 1899
+    #%graph.y 232
+  }
+  @ ./timer1 core:timing:timer {
+    #%graph.x 34
+    #%graph.y 21
+    .period 0.15
+  }
+  @ ./gate1 core:routing:gate {
+    #%graph.x 406
+    #%graph.y 21
+    .active true
+    .pattern [array 1 0 0.1]
+  }
+  @ ./sampleplayer1 audio:sampleplayer {
+    #%graph.x 544
+    #%graph.y 26
+    .sample [file "resources/audio/Kick_Reg_1b.wav"]
+  }
+  @ ./gain1 audio:gain {
+    #%graph.x 779
+    #%graph.y 125
+    .level 0.5
+  }
+  @ ./sampleplayer2 audio:sampleplayer {
+    #%graph.x 544
+    #%graph.y 265
+    .sample [file "resources/audio/Snare_Reg_1a.wav"]
+  }
+  @ ./gain2 audio:gain {
+    #%graph.x 789
+    #%graph.y 334
+    .level 0.46148061752319336
+  }
+  @ ./freeverb1 audio:reverb:freeverb {
+    #%graph.x 1364
+    #%graph.y 209
+    .room-size 0.5233136415481567
+    .damp 0.7935901880264282
+    .width 0.4543561041355133
+    .wet 0.1890663057565689
+    .dry 0.46124032139778137
+  }
+  @ ./gate2 core:routing:gate {
+    #%graph.x 381
+    #%graph.y 293
+    .active true
+    .pattern [array 0 0 0 0 1 0 0 0]
+  }
+  @ ./gain3 audio:gain {
+    #%graph.x 855
+    #%graph.y 590
+    .level 0.4607856273651123
+  }
+  @ ./sampleplayer3 audio:sampleplayer {
+    #%graph.x 546
+    #%graph.y 585
+    .sample [file "resources/audio/HH_2_open.wav"]
+  }
+  @ ./gate3 core:routing:gate {
+    #%graph.x 199
+    #%graph.y 874
+    .active true
+    .pattern [array 0 0 0.75 0 0 0]
+  }
+  @ ./sampleplayer4 audio:sampleplayer {
+    #%graph.x 546
+    #%graph.y 915
+    .sample [file "resources/audio/HH_2_closed_a.wav"]
+  }
+  @ ./gain4 audio:gain {
+    #%graph.x 854
+    #%graph.y 876
+    .level 0.4607856273651123
+  }
+  @ ./gate4 core:routing:gate {
+    #%graph.x 22
+    #%graph.y 341
+    .active true
+    .pattern [array 1 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0]
+  }
+  @ ./random1 core:math:random {
+    #%graph.x 565
+    #%graph.y 487
+    .minimum 0.35
+    .range 0.2
+  }
+  @ ./random2 core:math:random {
+    #%graph.x 564
+    #%graph.y 813
+    .minimum 0.4
+    .range 0.2
+  }
+  @ ./iterator1 core:array:iterator {
+    #%graph.x 229
+    #%graph.y 461
+    .values [array "0 0 0 0 1 0 0 0" "0 0 0 0 1 0 0 0.5" "0 0 0 0 1 0 0 0" "0 0 0 1 1 0 0 0 0.5 0.5 0.5 0.5 1 0.5 1"]
+  }
+  @ ./sampleplayer5 audio:sampleplayer {
+    #%graph.x 419
+    #%graph.y 1141
+    .sample [file "resources/audio/acidbass007.wav"]
+    .speed 0.94
+  }
+  @ ./gate5 core:routing:gate {
+    #%graph.x 116
+    #%graph.y 1098
+    .active true
+    .pattern [array 1 0 0 0 0 1 0 0 1 0 1 0 0 0.7 0.7 0.7]
+  }
+  @ ./gain5 audio:gain {
+    #%graph.x 767
+    #%graph.y 1184
+    .level 0.3499999940395355
+  }
+  @ ./mono-delay1 audio:delay:mono-delay {
+    #%graph.x 1209
+    #%graph.y 1044
+    .time 0.10000000149011612
+    .feedback 0.30000001192092896
+    .mix 0.5
+  }
+  @ ./mono-delay2 audio:delay:mono-delay {
+    #%graph.x 1222
+    #%graph.y 1212
+    .time 0.30000001192092896
+    .feedback 0.30000001192092896
+    .mix 0.5
+  }
+  @ ./iterator2 core:array:iterator {
+    #%graph.x 265
+    #%graph.y 1141
+    .values [array 1 2 1.5 1 0.94]
+    .ping-pong true
+  }
+  @ ./iterator3 core:array:iterator {
+    #%graph.x 107
+    #%graph.y 1258
+    .values [array "1 2 1.5 1 0.94" "1 2 1.5 1.78 0.94 4 2" "1 2 1.5 1 0.94" "4 2 1.5 1 0.94"]
+  }
+  @ ./iir1 audio:filter:iir {
+    #%graph.x 907
+    #%graph.y 1042
+    .type LP12
+    .frequency 440.0
+    .resonance 20.0
+    .mix 1.0
+  }
+  @ ./chorus1 audio:modulation:chorus {
+    #%graph.x 1058
+    #%graph.y 1089
+    .depth 1.850000023841858
+    .rate 0.3499999940395355
+    .feedback 0.25
+    .mix 1.0
+  }
+  @ ./chorus2 audio:modulation:chorus {
+    #%graph.x 1044
+    #%graph.y 1251
+    .depth 1.899999976158142
+    .rate 0.35
+    .feedback 0.25
+    .mix 1.0
+  }
+  @ ./master1 audio:gain {
+    #%graph.x 1652
+    #%graph.y 167
+  }
+  @ ./master2 audio:gain {
+    #%graph.x 1656
+    #%graph.y 275
+  }
+  @ ./start-trigger1 core:start-trigger {
+    #%graph.x 776
+    #%graph.y 21
+  }
+  @ ./zero core:variable {
+    #%graph.x 1262
+    #%graph.y 105
+    .value 0
+  }
+  @ ./one core:variable {
+    #%graph.x 1262
+    #%graph.y 20
+    .value 1
+  }
+  @ ./animator1 core:timing:animator {
+    #%graph.x 1414
+    #%graph.y 39
+    .value 1.0
+    .time 4.0
+  }
+  @ ./level1 audio:analysis:level {
+    #%graph.x 624
+    #%graph.y 1173
+  }
+  @ ./drums audio:gain {
+    #%graph.x 1172
+    #%graph.y 227
+  }
+  @ ./level2 audio:analysis:level {
+    #%graph.x 1020
+    #%graph.y 229
+  }
+  @ ./inhibitor1 core:routing:inhibitor {
+    #%graph.x 614
+    #%graph.y 1318
+    .time 0.02
+  }
+  @ ./send1 core:routing:send {
+    #%graph.x 708
+    #%graph.y 1427
+    .address /video/custom1.level-1
+  }
+  @ ./inhibitor2 core:routing:inhibitor {
+    #%graph.x 1388
+    #%graph.y 431
+    .time 0.05
+  }
+  @ ./send2 core:routing:send {
+    #%graph.x 1649
+    #%graph.y 517
+    .address /video/custom1.level-2
+  }
+  @ ./threshold1 core:math:threshold {
+    #%graph.x 1158
+    #%graph.y 487
+    .threshold 0.5
+  }
+  @ ./fx-ctl core:custom {
+    #%graph.x 875
+    #%graph.y 1359
+    .code "
+
+    int\[\] freqs = new int\[\] \{440,880,1660,6640\};
+    
+    @P(1) @ReadOnly Property freq;
+    @P(2) @ReadOnly Property fb;
+    
+    @Out(1) Output freqOut;
+    @Out(2) Output fbOut;
+    
+    @Override
+    public void setup() \{
+        freq.set(freqs\[0\]);
+        fb.set(0.25);
+    \}
+
+    @Override
+    public void update() \{
+        if (!freq.isAnimating()) \{
+            int idx = (int) random(freqs.length);
+            freq.to(freqs\[idx\]).in(random(4,8));
+            if (random(1) < 0.33) \{
+                fb.to(0.65).in(2);
+            \} else \{
+                fb.to(0.25).in(2);
+            \}
+        \}
+        freqOut.send(d(freq));
+        fbOut.send(d(fb));
+    \}
+"
+  }
+  ~ ./sampleplayer1!out ./gain1!in
+  ~ ./sampleplayer3!out ./gain3!in
+  ~ ./timer1!out ./gate1!in
+  ~ ./gate1!out ./sampleplayer1!play
+  ~ ./gate2!out ./sampleplayer2!play
+  ~ ./gate3!out ./sampleplayer3!play
+  ~ ./gate3!in ./timer1!out
+  ~ ./gate2!in ./timer1!out
+  ~ ./gate4!in ./timer1!out
+  ~ ./gate3!discard ./sampleplayer4!play
+  ~ ./sampleplayer4!out ./gain4!in
+  ~ ./gate4!out ./gate1!retrigger
+  ~ ./gate4!out ./gate2!retrigger
+  ~ ./gate4!out ./gate3!retrigger
+  ~ ./random1!out ./gain2!level
+  ~ ./gate2!out ./random1!trigger
+  ~ ./gate3!out ./random2!trigger
+  ~ ./gate3!discard ./random2!trigger
+  ~ ./random2!out ./gain3!level
+  ~ ./gain2!in ./sampleplayer2!out
+  ~ ./gate4!out ./iterator1!trigger
+  ~ ./iterator1!out ./gate2!pattern
+  ~ ./gain3!link ./gain4!link
+  ~ ./mono-delay1!out ./freeverb1!in-1
+  ~ ./mono-delay2!out ./freeverb1!in-2
+  ~ ./iterator2!out ./sampleplayer5!speed
+  ~ ./iterator2!out ./sampleplayer5!play
+  ~ ./gate5!out ./iterator2!trigger
+  ~ ./gate5!in ./timer1!out
+  ~ ./gate4!out ./gate5!retrigger
+  ~ ./iterator3!out ./iterator2!values
+  ~ ./iterator3!trigger ./gate4!out
+  ~ ./gain5!out ./iir1!in
+  ~ ./iir1!out ./chorus2!in
+  ~ ./chorus2!out ./mono-delay2!in
+  ~ ./iir1!out ./chorus1!in
+  ~ ./chorus1!out ./mono-delay1!in
+  ~ ./freeverb1!out-2 ./master2!in
+  ~ ./master2!out ./output1!in-2
+  ~ ./output1!in-1 ./master1!out
+  ~ ./master1!in ./freeverb1!out-1
+  ~ ./master1!link ./master2!link
+  ~ ./start-trigger1!out ./zero!trigger
+  ~ ./start-trigger1!out ./one!trigger
+  ~ ./zero!out ./animator1!value
+  ~ ./one!out ./animator1!to
+  ~ ./animator1!out ./master1!level
+  ~ ./sampleplayer5!out ./level1!in
+  ~ ./level1!out ./gain5!in
+  ~ ./inhibitor2!out ./send2!in
+  ~ ./level1!level ./inhibitor1!in
+  ~ ./inhibitor1!out ./send1!in
+  ~ ./level2!level ./threshold1!in
+  ~ ./threshold1!out-high ./send2!in
+  ~ ./threshold1!out-low ./inhibitor2!in
+  ~ ./level2!out ./drums!in
+  ~ ./drums!out ./freeverb1!in-1
+  ~ ./freeverb1!in-2 ./drums!out
+  ~ ./level2!in ./gain1!out
+  ~ ./gain2!out ./level2!in
+  ~ ./gain3!out ./level2!in
+  ~ ./gain4!out ./level2!in
+  ~ ./fx-ctl!freq-out ./iir1!frequency
+  ~ ./fx-ctl!fb-out ./chorus1!feedback
+  ~ ./fx-ctl!fb-out ./chorus2!feedback
+  ~ ./threshold1!out-high ./inhibitor2!in
+}

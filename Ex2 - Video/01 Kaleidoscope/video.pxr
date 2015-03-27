@@ -1,0 +1,140 @@
+@ /video root:video {
+  #%pxr.format 2
+  .renderer OpenGL
+  .width 800
+  .height 600
+  @ ./capture1 video:capture {
+    #%graph.x 220
+    #%graph.y 216
+    .device 1
+    .source-width 800
+    .source-height 600
+  }
+  @ ./start-trigger1 core:start-trigger {
+  }
+  @ ./output1 video:output {
+    #%graph.x 787
+    #%graph.y 189
+    .always-on-top true
+  }
+  @ ./kaleidoscope video:gl:p3d {
+    #%graph.x 464
+    #%graph.y 246
+    .code "
+
+    @P(1)
+    @Type.Number(min = 0, max = 10, def = 1)
+    double segments;
+    
+    void updateUniforms() \{
+         shader.set(\"segments\", segments);
+    \}
+
+    
+    // BOILERPLATE BELOW
+    @In(0)
+    PImage in;
+    @P(0)
+    @Type.String(mime = GLSL_FRAGMENT_MIME, template = DEFAULT_FRAGMENT_SHADER)
+    @OnChange(\"updateShader\")
+    @Port(false)
+    String fragment;
+
+    PShader shader;
+
+    @Override
+    public void setup() \{
+        updateShader();
+    \}
+
+    @Override
+    public void draw() \{
+        if (shader == null) \{
+            shader = createShader(DEFAULT_VERTEX_SHADER,
+                    fragment.isEmpty() ? DEFAULT_FRAGMENT_SHADER : fragment);
+        \}
+        shader(shader);
+        updateUniforms();
+        image(in, 0, 0);
+        resetShader();
+    \}
+
+    void updateShader() \{
+        shader = null;
+    \}
+
+"
+    .fragment "//https://github.com/neilmendoza/ofxPostProcessing/blob/master/src/KaleidoscopePass.cpp
+
+varying vec4 vertTexCoord;
+uniform sampler2D texture;
+uniform float segments;
+             
+void main() \{
+  vec2 uv =vertTexCoord.st;
+  vec2 normed = 2.0 * uv - 1.0;
+  float r = length(normed);
+  float theta = atan(normed.y / abs(normed.x));
+  theta *= segments;
+  vec2 newUv = (vec2(r * cos(theta), r * sin(theta)) + 1.0) / 2.0;        
+  gl_FragColor = texture2D(texture, newUv);
+\}"
+    .segments 4.003458250864644
+  }
+  @ ./iterator1 core:array:iterator {
+    #%graph.x 243
+    #%graph.y 373
+    .values [array 3 7 4 9 0]
+  }
+  @ ./timer1 core:timing:timer {
+    #%graph.x 117
+    #%graph.y 510
+    .period 5
+  }
+  @ ./animator1 core:timing:animator {
+    #%graph.x 433
+    #%graph.y 394
+    .code "
+
+    @P(1) @Type.Number @Transient @OnChange(\"toChanged\")
+    double to;
+    @P(2) @Type.Number @OnChange(\"valueChanged\")
+    Property value;
+    @P(3) @Type.Number(min = 0, max = 60, def = 0)
+    double time;
+    
+    @Out(1) Output out;
+    boolean active;
+
+    @Override
+    public void update() \{
+        if (value.isAnimating()) \{
+            out.send(d(value));
+            active = true;
+        \} else if (active) \{
+            out.send(to);
+            active = false;
+        \}
+    \}
+    
+    void toChanged() \{
+        value.to(to).in(time).easeInOut();
+        active = true;
+    \}
+    
+    void valueChanged() \{
+        to = d(value);
+        active = false;
+        out.send(to);
+    \}
+"
+    .value 4.003458250864644
+    .time 4
+  }
+  ~ ./start-trigger1!out ./capture1!play
+  ~ ./capture1!out ./kaleidoscope!in
+  ~ ./kaleidoscope!out ./output1!in
+  ~ ./timer1!out ./iterator1!trigger
+  ~ ./iterator1!out ./animator1!to
+  ~ ./animator1!out ./kaleidoscope!segments
+}

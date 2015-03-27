@@ -1,0 +1,39 @@
+@ /audio root:audio {
+  @ ./output1 audio:output {
+    #%graph.x 580
+    #%graph.y 226
+  }
+  @ ./hel audio:sampleplayer {
+    #%graph.x 54
+    #%graph.y 33
+    .sample [file "resources/audio/hel.wav"]
+  }
+  @ ./lo audio:sampleplayer {
+    #%graph.x 56
+    #%graph.y 227
+    .sample [file "resources/audio/lo.wav"]
+  }
+  @ ./world audio:sampleplayer {
+    #%graph.x 54
+    #%graph.y 422
+    .sample [file "resources/audio/world.wav"]
+  }
+  @ ./gain1 audio:gain {
+    #%graph.x 416
+    #%graph.y 225
+    .level 0.65
+  }
+  @ ./mono-delay1 audio:delay:mono-delay {
+    #%graph.x 211
+    #%graph.y 226
+    .time 0.1
+    .feedback 0.6
+    .mix 0.5
+  }
+  ~ ./gain1!out ./output1!in-1
+  ~ ./output1!in-2 ./gain1!out
+  ~ ./mono-delay1!out ./gain1!in
+  ~ ./mono-delay1!in ./hel!out
+  ~ ./lo!out ./mono-delay1!in
+  ~ ./world!out ./mono-delay1!in
+}
