@@ -56,10 +56,7 @@
         image(in, -w2, -h2);
     \}
 "
-    .rotate-x -69.74434148630459
-    .rotate-y -1.9553094589144422
-    .rotate-z -36.82678309920581
-    .scale 0.75
+    .scale 0.07663030519333289
   }
   @ ./scene-ctrl core:custom {
     #%graph.x 60
@@ -71,6 +68,7 @@
     @Out(3) Output rotYOut;
     @Out(4) Output rotZOut;
     @Out(5) Output noiseOut;
+    @Out(6) Output transition;
     
     @P(1) @ReadOnly Property scale;
     @P(2) @ReadOnly Property rotX;
@@ -78,8 +76,11 @@
     @P(4) @ReadOnly Property rotZ;
     @P(5) @ReadOnly Property noise;
     
+    boolean transitioned;
+    
     @Override
     public void starting() \{
+        transitioned = false;
         scale.set(0).to(0.75).in(10).easeIn();
         noise.set(0).to(0.4).in(60).easeIn();
         rotX.set(0);
@@ -89,7 +90,11 @@
     
     @Override
     public void update() \{
-        if (!rotX.isAnimating() && !scale.isAnimating()) \{
+        if (!transitioned && !scale.isAnimating()) \{
+            transitioned = true;
+            transition.send();
+        \}
+        if (transitioned && !rotX.isAnimating()) \{
             rotX.to(random(-180,180)).in(5).easeInOut();
             rotY.to(random(-180,180)).in(5).easeInOut();
             rotZ.to(random(-180,180)).in(5).easeInOut();
@@ -366,7 +371,7 @@ uniform float frequency;
                 vec2 pos = 0.5 - vertTexCoord.st;  
                 gl_FragColor = texture2D(texture, texCoords); 
             \}"
-    .amplitude 0.4
+    .amplitude 0.001616288595979203
   }
   @ ./colourbalance video:custom {
     #%graph.x 269
@@ -403,6 +408,11 @@ uniform float frequency;
     .align-x 1.0
     .align-y 1.0
   }
+  @ ./send1 core:routing:send {
+    #%graph.x 81
+    #%graph.y 517
+    .address /audio/signal.trigger
+  }
   ~ ./scene-ctrl!scale-out ./xform-3d!scale
   ~ ./scene-ctrl!rot-x-out ./xform-3d!rotate-x
   ~ ./scene-ctrl!rot-y-out ./xform-3d!rotate-y
@@ -415,4 +425,5 @@ uniform float frequency;
   ~ ./still2!out ./output1!in
   ~ ./noise-warp!out ./output1!in
   ~ ./xform-3d!out ./output1!in
+  ~ ./scene-ctrl!transition ./send1!in
 }

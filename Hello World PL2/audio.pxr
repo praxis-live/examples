@@ -13,6 +13,7 @@
   @ ./sine1 audio:sine {
     #%graph.x 461
     #%graph.y 214
+    .frequency 660
   }
   @ ./timer1 core:timing:timer {
     #%graph.x 23
@@ -22,7 +23,7 @@
   @ ./sine2 audio:sine {
     #%graph.x 668
     #%graph.y 263
-    .frequency 660.0
+    .frequency 555.0
   }
   @ ./multiply1 core:math:multiply {
     #%graph.x 331
@@ -75,7 +76,7 @@
   @ ./animator2 core:timing:animator {
     #%graph.x 493
     #%graph.y 300
-    .value 990.0
+    .value 555.0
     .time 0.025
   }
   @ ./gate1 core:routing:gate {
@@ -88,6 +89,7 @@
     #%graph.x 415
     #%graph.y 647
     .sample [file "resources/audio/Snare_Reg_1a.wav"]
+    .speed 1.4466317892074585
   }
   @ ./sampleplayer2 audio:sampleplayer {
     #%graph.x 784
@@ -97,7 +99,7 @@
   @ ./gain2 audio:gain {
     #%graph.x 899
     #%graph.y 667
-    .level 0.4000000059604645
+    .level 0.0
   }
   @ ./gate2 core:routing:gate {
     #%graph.x 169
@@ -131,13 +133,13 @@
   @ ./animator3 core:timing:animator {
     #%graph.x 580
     #%graph.y 869
-    .value 1.0
+    .value 1.44663176
     .time 2.0
   }
   @ ./sine-gain audio:gain {
     #%graph.x 858
     #%graph.y 247
-    .level 0.75
+    .level 0.0
   }
   @ ./chorus1 audio:modulation:chorus {
     #%graph.x 705
@@ -145,6 +147,7 @@
     .depth 6.303225782609754
     .rate 0.7629032317669155
     .feedback 0.9354838709677419
+    .mix 0.15533682703971863
   }
   @ ./random3 core:array:random {
     #%graph.x 568
@@ -154,11 +157,12 @@
   @ ./animator4 core:timing:animator {
     #%graph.x 781
     #%graph.y 860
+    .value 0.155336824
     .time 2.0
   }
   @ ./start-trigger1 core:start-trigger {
-    #%graph.x 229
-    #%graph.y 450
+    #%graph.x 253
+    #%graph.y 411
   }
   @ ./zero core:variable {
     #%graph.x 477
@@ -168,18 +172,11 @@
   @ ./animator5 core:timing:animator {
     #%graph.x 866
     #%graph.y 466
-    .value 0.4
-    .time 14
-  }
-  @ ./delay1 core:timing:delay {
-    #%graph.x 466
-    #%graph.y 514
     .time 14
   }
   @ ./animator6 core:timing:animator {
     #%graph.x 918
     #%graph.y 365
-    .value 0.75
     .time 14
   }
   @ ./drum-level core:variable {
@@ -211,7 +208,11 @@
   @ ./gain3 audio:gain {
     #%graph.x 1042
     #%graph.y 930
-    .level 0.4000000059604645
+    .level 0.0
+  }
+  @ ./signal core:variable {
+    #%graph.x 482
+    #%graph.y 527
   }
   ~ ./mono-delay1!out ./output1!in-1
   ~ ./gain1!out ./mono-delay1!in
@@ -246,12 +247,9 @@
   ~ ./start-trigger1!out ./zero!trigger
   ~ ./zero!out ./animator5!value
   ~ ./animator5!out ./gain2!level
-  ~ ./start-trigger1!out ./delay1!in
   ~ ./zero!out ./animator6!value
   ~ ./animator6!out ./sine-gain!level
-  ~ ./delay1!out ./drum-level!trigger
   ~ ./drum-level!out ./animator5!to
-  ~ ./delay1!out ./sine-level!trigger
   ~ ./sine-level!out ./animator6!to
   ~ ./level1!level ./scale1!in
   ~ ./scale1!out ./send1!in
@@ -263,4 +261,6 @@
   ~ ./gain2!out ./level1!in
   ~ ./level1!out ./freeverb1!in-1
   ~ ./level1!out ./freeverb1!in-2
+  ~ ./signal!out ./sine-level!trigger
+  ~ ./signal!out ./drum-level!trigger
 }
