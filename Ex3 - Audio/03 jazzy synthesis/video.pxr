@@ -1,0 +1,182 @@
+@ /video root:video {
+  #%pxr.format 2
+  #%pxr.format 2
+  .renderer OpenGL
+  @ ./output1 video:output {
+    #%graph.x 806
+    #%graph.y 274
+    .always-on-top true
+  }
+  @ ./custom1 video:custom {
+    #%graph.x 84
+    #%graph.y 183
+    .code "
+
+    @P(1)
+    @Type.Number(min = 0, max = 1)
+    @Transient
+    double level1;
+    @P(2)
+    @Type.Number(min = 0, max = 1)
+    @Transient
+    double level2;
+
+    @In(1)
+    PImage in;
+
+    @Override
+    public void draw() \{
+        blendMode(BLEND,0.2);
+        image(in,0,0);
+        noStroke();
+        fill(0, 200, 120);
+        blendMode(ADD, 0.5);
+        double dim = level1 * height / 2;
+        rect((width / 2) - dim, (height / 2) - (dim / 2),
+                dim * 2, dim);
+        dim = level2 * height;
+        fill(150, 0, 100);
+        rect((width / 2) - (dim / 2), (height / 2) - (dim),
+                dim, dim * 2);
+    \}
+"
+  }
+  @ ./kaleidoscope video:gl:p3d {
+    #%graph.x 266
+    #%graph.y 182
+    .code "
+
+    @P(1)
+    @Type.Number(min = 0, max = 10, def = 1)
+    double segments;
+    
+    void updateUniforms() \{
+         shader.set(\"segments\", segments);
+    \}
+
+    
+    // BOILERPLATE BELOW
+    @In(0)
+    PImage in;
+    @P(0)
+    @Type.String(mime = GLSL_FRAGMENT_MIME, template = DEFAULT_FRAGMENT_SHADER)
+    @OnChange(\"updateShader\")
+    @Port(false)
+    String fragment;
+
+    PShader shader;
+
+    @Override
+    public void setup() \{
+        updateShader();
+    \}
+
+    @Override
+    public void draw() \{
+        if (shader == null) \{
+            shader = createShader(DEFAULT_VERTEX_SHADER,
+                    fragment.isEmpty() ? DEFAULT_FRAGMENT_SHADER : fragment);
+        \}
+        shader(shader);
+        updateUniforms();
+        image(in, 0, 0);
+        resetShader();
+    \}
+
+    void updateShader() \{
+        shader = null;
+    \}
+
+"
+    .fragment "//https://github.com/neilmendoza/ofxPostProcessing/blob/master/src/KaleidoscopePass.cpp
+
+varying vec4 vertTexCoord;
+uniform sampler2D texture;
+uniform float segments;
+             
+void main() \{
+  vec2 uv =vertTexCoord.st;
+  vec2 normed = 2.0 * uv - 1.0;
+  float r = length(normed);
+  float theta = atan(normed.y / abs(normed.x));
+  theta *= segments;
+  vec2 newUv = (vec2(r * cos(theta), r * sin(theta)) + 1.0) / 2.0;        
+  gl_FragColor = texture2D(texture, newUv);
+\}"
+    .segments 6.971141702724129
+  }
+  @ ./xform-3d video:gl:p3d {
+    #%graph.x 570
+    #%graph.y 204
+    .code "
+
+    @In(1)
+    PImage in;
+    @P(1)
+    @Type.Number(min = 0, max = 1, def = 0.5)
+    double translate_x;
+    @P(2)
+    @Type.Number(min = 0, max = 1, def = 0.5)
+    double translate_y;
+    @P(3)
+    @Type.Number(min = -180, max = 180, def = 0)
+    double rotate_x;
+    @P(4)
+    @Type.Number(min = -180, max = 180, def = 0)
+    double rotate_y;
+    @P(5)
+    @Type.Number(min = -180, max = 180, def = 0)
+    double rotate_z;
+    @P(6)
+    @Type.Number(min = 0, max = 2, def = 1)
+    double scale;
+    
+    @Override
+    public void draw() \{
+        double w2 = width / 2;
+        double h2 = height / 2;
+        translate(
+                map(translate_x, 0, 1, -w2, width + w2), 
+                map(translate_y, 0, 1, -h2, height + h2), 
+                0);
+        rotateX(map(rotate_x, -180, 180, -PI, PI));
+        rotateY(map(rotate_y, -180, 180, -PI, PI));
+        rotateZ(map(rotate_z, -180, 180, -PI, PI));
+        scale(scale);
+        image(in, -w2, -h2);
+    \}
+"
+    .translate-x 0.49
+    .translate-y 0.51
+    .rotate-x 1
+    .rotate-y -5.0
+    .rotate-z 2
+    .scale 0.99
+  }
+  @ ./scale1 core:math:scale {
+    #%graph.x 344
+    #%graph.y 299
+    .x1 0.2
+    .x2 0.4
+    .y1 -5
+    .y2 5
+  }
+  @ ./level3 core:property {
+    #%graph.x 115
+    #%graph.y 312
+    .value 0.012386495014854034
+  }
+  @ ./composite1 video:composite {
+    #%graph.x 522
+    #%graph.y 54
+    .mix 0.7580645161290323
+  }
+  ~ ./custom1!out ./kaleidoscope!in
+  ~ ./level3!out ./scale1!in
+  ~ ./kaleidoscope!out ./xform-3d!in
+  ~ ./xform-3d!out ./output1!in
+  ~ ./xform-3d!out ./composite1!src
+  ~ ./composite1!out ./xform-3d!in
+  ~ ./kaleidoscope!out ./custom1!in
+  ~ ./scale1!out ./xform-3d!rotate-y
+}

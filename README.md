@@ -62,13 +62,17 @@ Shape ported from http://processing.org/examples/texturecylinder.html
 
 #### audio seq
 
-Praxis LIVE is not really aimed at sequencing music, but this project provides a simple drum machine and bass line with changing FX, as well as a visualization of the sound.
+This project provides a simple drum machine and bass line with changing FX, as well as a visualization of the sound.
 
 #### blob theremin
 
 **Requires webcam**
 
 A simple blob tracking example controlling a sine wave. Give the camera 10s to adjust to the background before you start moving!
+
+#### jazzy synthesis **NEW**
+
+Showcasing the new audio coding features (substractive and PM synthesis) and the use of the new tracker component for sequencing. A few `core:array:iterator` components are used to create a constantly changing improvisation.
 
 ### TinkerForge
 

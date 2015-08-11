@@ -1,0 +1,753 @@
+@ /audio root:audio {
+  #%pxr.format 2
+  #%pxr.format 2
+  @ ./duo-osc audio:custom {
+    #%graph.x 1013
+    #%graph.y 199
+    .code "
+
+    final String SW = \"Saw\";
+    final String SQ = \"Square\";
+    
+    @Out(1) AudioOut out;
+    
+    @UGen Osc osc, osc2;
+    @UGen IIRFilter filter;
+    @UGen Gain amp;
+    
+    @P(1) @Type.String(allowed = \{SW, SQ\}) @OnChange(\"updateWaves\") @Port(false)
+    String waveform1;
+    @P(2) @Type.String(allowed = \{SW, SQ\}) @OnChange(\"updateWaves\") @Port(false)
+    String waveform2;
+    @P(3) @Type.Number(min=0, max=1, def=1)
+    double level;
+    @P(4) @Type.Number(min=0, max=1, def=0) @Port(false)
+    double osc2Level;
+    @P(5) @Type.Integer(min=-24, max=24, def=-12) @Port(false)
+    int osc2Transpose;
+    @P(6) @Type.Number(min=110, max=8000, def=8000)
+    double cutoff;
+    @P(7) @Type.Number(min=0, max=20)
+    double resonance;
+    @P(8) @Type.Number(min=0, max=2)
+    double attack;
+    @P(9) @Type.Number(min=0, max=2, def=2)
+    double decay;
+    @P(10) @Type.Number(min=0, max=1, def=1)
+    double sustain;
+    @P(11) @Type.Number(min=0, max=2, def=0)
+    double release;
+    @P(12) @Type.Number(min=0, max=1) @Port(false)
+    double filterMod;
+    @P(13) @Type.Number(min=0, max=1, def=1) @Port(false)
+    double ampMod;
+
+    @Inject Property freq1, freq2, env;
+    
+    @Override
+    public void setup() \{
+        updateWaves();
+        filter.type(IIRFilter.LP12);
+        link(add(osc, osc2), filter, amp, out);
+    \}
+
+    @Override
+    public void update() \{
+        double hz = d(freq1);
+        osc.frequency(hz);
+        osc2.frequency(d(freq2)).gain(osc2Level * osc2Level);
+        double e = d(env);
+        hz = (e * hz * 7) + hz;
+        hz = (filterMod * hz) + ((1 - filterMod) * cutoff);
+        filter.frequency(hz).resonance(resonance);
+        e = e < 0.001 ? 0 : (ampMod * e * e) + (1 - ampMod);
+        e = e * level * level;
+        amp.level(e);
+    \} 
+    
+    @In(1) void note(String note) \{
+        if (\"-\".equals(note)) \{
+            return;
+        \}
+        int midi = noteToMidi(note);
+        if (midi > 0) \{
+            noteOn(midi);
+        \} else \{
+            noteOff();
+        \}
+    \}
+    
+    void noteOn(int midi) \{
+        double f = midiToFrequency(midi);
+        freq1.set(f);
+        double f2 = midiToFrequency(midi + osc2Transpose);
+        freq2.set(f2);
+        env.to(1,sustain).in(attack,decay);
+    \}
+    
+    void noteOff() \{
+        env.to(0).in(release);
+    \}
+    
+    void updateWaves() \{
+        osc.waveform(SQ.equals(waveform1) ? SQUARE : SAW);
+        osc2.waveform(SQ.equals(waveform2) ? SQUARE : SAW);
+    \}
+    
+"
+    .waveform-2 Square
+    .osc-2-level 0.814516129032258
+    .osc-2-transpose 7
+    .cutoff 873.5483870967739
+    .resonance 16.451612903225804
+    .decay 0.3
+    .sustain 0.20967741935483872
+    .release 0.14516129032258063
+    .filter-mod 1.0
+  }
+  @ ./output1 audio:output {
+    #%graph.x 1702
+    #%graph.y 306
+  }
+  @ ./gain1 audio:gain {
+    #%graph.x 1423
+    #%graph.y 115
+    .level 0.2
+  }
+  @ ./audio-clock audio:custom {
+    #%graph.x 26
+    #%graph.y 92
+    .code "
+
+    @P(1)
+    @Type.Number(min = 10, max = 300, def = 120)
+    @Port(false)
+    @OnChange(\"updatePulse\")
+    double bpm;
+    @P(2)
+    @Type.Integer(min=1,max=16,def=4)
+    @OnChange(\"updatePulse\")
+    int subdivision;
+    @P(3)
+    @ReadOnly
+    double actualBpm;
+    @P(4)
+    @ReadOnly
+    double period;
+    @P(5)
+    @ReadOnly
+    int bufferCount;
+    
+    @Out(1) Output out;
+    
+    @Inject int position; 
+
+    @Override
+    public void setup() \{
+        updatePulse();
+    \}
+
+    @Override
+    public void update() \{
+        position++;
+        if (position > bufferCount) \{
+            position = 0;
+            out.send();
+        \}
+    \}
+    
+    void updatePulse() \{
+        double secPerPulse = 1 / ((bpm * subdivision) / 60);
+        double bufPerPulse = secPerPulse / (blockSize / sampleRate);
+        bufferCount = (int) (bufPerPulse + 0.5);
+        period = bufferCount * (blockSize / sampleRate);
+        actualBpm = 60 / subdivision * (1 / period);
+    \}
+"
+  }
+  @ ./iterator1 core:array:iterator {
+    #%graph.x 603
+    #%graph.y 243
+    .values [array a3 - g3 e2 - "c#2" - a2 X d3 X]
+    .max-skip 3
+    .ping-pong true
+  }
+  @ ./overdrive1 audio:distortion:overdrive {
+    #%graph.x 1106
+    #%graph.y 29
+    .drive 0.6370967741935484
+    .mix 1
+  }
+  @ ./iterator2 core:array:iterator {
+    #%graph.x 623
+    #%graph.y 505
+    .values [array a4 - g4 - X b4 e4 - "c#4" d4 - a4 X a5 g5 X -]
+    .max-skip 3
+    .ping-pong true
+  }
+  @ ./mono-kit audio:custom {
+    #%graph.x 974
+    #%graph.y 653
+    .code "
+
+    @Out(1)
+    AudioOut out;
+    
+    @P(1) @OnChange(\"updateTables\") @Port(false)
+    Table sample1;
+    @P(2) @OnChange(\"updateTables\") @Port(false)
+    Table sample2;
+    @P(3) @OnChange(\"updateTables\") @Port(false)
+    Table sample3;
+    @P(4) @OnChange(\"updateTables\") @Port(false)
+    Table sample4;
+    @P(5) @OnChange(\"updateTables\") @Port(false)
+    Table sample5;
+    @P(6) @OnChange(\"updateTables\") @Port(false)
+    Table sample6;
+
+    @P(7) @Type.Number(min=0, max=1, def=1) @OnChange(\"updateLevels\")
+    double level1;
+    @P(8) @Type.Number(min=0, max=1, def=1) @OnChange(\"updateLevels\")
+    double level2;
+    @P(9) @Type.Number(min=0, max=1, def=1) @OnChange(\"updateLevels\")
+    double level3;
+    @P(10) @Type.Number(min=0, max=1, def=1) @OnChange(\"updateLevels\")
+    double level4;
+    @P(11) @Type.Number(min=0, max=1, def=1) @OnChange(\"updateLevels\")
+    double level5;
+    @P(12) @Type.Number(min=0, max=1, def=1) @OnChange(\"updateLevels\")
+    double level6;
+    
+    @UGen
+    Player pl1, pl2, pl3, pl4, pl5, pl6;
+    @UGen
+    Gain g1, g2, g3, g4, g5, g6;
+
+    @Override
+    public void setup() \{
+        updateTables();
+        updateLevels();
+        link(
+                add(
+                        link(pl1, g1),
+                        link(pl2, g2),
+                        link(pl3, g3),
+                        link(pl4, g4),
+                        link(pl5, g5),
+                        link(pl6, g6)
+                ),
+                out     
+        );
+    \}
+    
+    void updateTables() \{
+        pl1.table(sample1);
+        pl2.table(sample2);
+        pl3.table(sample3);
+        pl4.table(sample4);
+        pl5.table(sample5);
+        pl6.table(sample6);
+    \}
+    
+    void updateLevels() \{
+        g1.level(level1 * level1);
+        g2.level(level2 * level2);
+        g3.level(level3 * level3);
+        g4.level(level4 * level4);
+        g5.level(level5 * level5);
+        g6.level(level6 * level6);
+    \}
+    
+    @T(1) void play1() \{
+        pl1.play();
+    \}
+    
+    @T(2) void play2() \{
+        pl2.play();
+    \}
+    
+    @T(3) void play3() \{
+        pl3.play();
+    \}
+    
+    @T(4) void play4() \{
+        pl4.play();
+    \}
+    
+    @T(5) void play5() \{
+        pl5.play();
+    \}
+    
+    @T(6) void play6() \{
+        pl6.play();
+    \}
+    
+"
+    .sample-1 [file "resources/Kick_Reg_1b.wav"]
+    .sample-2 [file "resources/Snare_Reg_1a.wav"]
+    .sample-3 [file "resources/HH_2_closed_a.wav"]
+    .sample-4 [file "resources/HH_2_open.wav"]
+    .level-2 0.7
+    .level-3 0.8
+    .level-4 0.6
+  }
+  @ ./gain2 audio:gain {
+    #%graph.x 1319
+    #%graph.y 687
+    .level 0.5
+  }
+  @ ./tracker1 core:custom {
+    #%graph.x 414
+    #%graph.y 767
+    .code "import org.praxislive.tracker.*;
+
+
+    @P(1)
+    Patterns patterns;
+    @P(2)
+    @Type.Integer(min = 0)
+    int pattern;
+    @P(3)
+    @Type.Integer(min = 0)
+    @Transient
+    int position;
+
+    @Out(1)
+    Output out1;
+    @Out(2)
+    Output out2;
+    @Out(3)
+    Output out3;
+    @Out(4)
+    Output out4;
+
+    Output\[\] outs;
+
+    @Override
+    public void setup() \{
+        outs = new Output\[\]\{out1, out2, out3, out4\};
+
+    \}
+
+    @Override
+    public void starting() \{
+        position = 0;
+    \}
+
+    @T(1)
+    void trigger() \{
+        Pattern p;
+        if (pattern >= patterns.getPatternCount()) \{
+            position = 0;
+            return;
+        \}
+        p = patterns.getPattern(pattern);
+        position %= p.getRowCount();
+        int max = min(p.getColumnCount(), outs.length);
+        for (int i = 0; i < max; i++) \{
+            Argument arg = p.getValueAt(position, i);
+            if (arg != null) \{
+                outs\[i\].send(arg);
+            \}
+        \}
+        position++;
+        position %= p.getRowCount();
+    \}
+
+    @T(2)
+    void reset() \{
+        position = 0;
+    \}
+
+"
+    .patterns "1       .       1       .
+.       .       0.8
+.       .       0.8
+0.75    .       0.7
+.       1       0.5
+.       .       0       0.3
+1       .       1
+.       .       0.4
+0.5     .       0.4
+.       .       0.6
+.       .       0.6
+.       .       0.6
+.       .       .       0.6
+.       0.7     .
+1       .       0.8
+.       .       .       0.8
+
+
+
+
+1       .       1       .
+.       .       0.8
+.       .       0.8
+0.75    .       0.7
+.       1       0.5
+.       .       0       0.3
+1       .       1
+.       .       0.6
+0.5     0.2     0.7
+.       0.3     0.6
+.       0.4     0.7
+.       0.5     0.6
+.       0.6     .       0.6
+.       0.7     .
+1       0.8     0.8
+.       .       .       0.8
+
+
+
+
+1       .       1       .
+.       .       0.8
+.       .       0.8
+0.75    .       0.7
+.       1       0.5
+.       .       0       0.3
+1       .       1
+.       .       0.6
+0.8     0.8     .       0.8
+.       
+.
+0.8     0.8     .       0.8
+.       
+.
+0.8     0.8     .       0.8
+.       
+"
+  }
+  @ ./gain3 audio:gain {
+    #%graph.x 1247
+    #%graph.y 324
+    .level 0.1
+  }
+  @ ./freeverb1 audio:reverb:freeverb {
+    #%graph.x 1499
+    #%graph.y 279
+    .room-size 0.29999998211860657
+    .damp 0.717741935483871
+    .wet 0.1
+  }
+  @ ./gate1 core:routing:gate {
+    #%graph.x 452
+    #%graph.y 543
+    .active true
+    .pattern [array 1 0 0.5]
+  }
+  @ ./iterator3 core:array:iterator {
+    #%graph.x 624
+    #%graph.y 597
+    .values [array d4 a4 e4]
+  }
+  @ ./mono-delay1 audio:delay:mono-delay {
+    #%graph.x 939
+    #%graph.y 468
+    .time 0.25
+    .feedback 0.2
+    .mix 0.5
+  }
+  @ ./every core:custom {
+    #%graph.x 410
+    #%graph.y 61
+    .code "
+
+    @P(1)
+    @Type.Integer(min = 0)
+    @Port(false)
+    int count;
+    @P(2)
+    @ReadOnly
+    int position;
+
+    @Out(1)
+    Output out;
+
+    @Override
+    public void starting() \{
+        position = 0;
+    \}
+
+    @In(1)
+    void in(Argument value) \{
+        position %= count;
+        if (position == 0) \{
+            out.send(value);
+        \}
+        position++;
+        position %= count;
+    \}
+
+    @T(1)
+    void reset() \{
+        position = 0;
+    \}
+
+"
+    .count 16
+  }
+  @ ./order core:custom {
+    #%graph.x 205
+    #%graph.y 139
+    .code "
+
+    @Out(1) Output out1;
+    @Out(2) Output out2;    
+    
+    @In(1) void in(Argument value) \{
+        out1.send(value);
+        out2.send(value);
+    \}
+"
+  }
+  @ ./sequence core:custom {
+    #%graph.x 599
+    #%graph.y 65
+    .code "import org.praxislive.tracker.*;
+
+
+    @P(1)
+    Patterns patterns;
+    @P(2)
+    @Type.Integer(min = 0)
+    int pattern;
+    @P(3)
+    @Type.Integer(min = 0)
+    @Transient
+    int position;
+
+    @Out(1)
+    Output out1;
+    @Out(2)
+    Output out2;
+    @Out(3)
+    Output out3;
+    @Out(4)
+    Output out4;
+
+    Output\[\] outs;
+
+    @Override
+    public void setup() \{
+        outs = new Output\[\]\{out1, out2, out3, out4\};
+
+    \}
+
+    @Override
+    public void starting() \{
+        position = 0;
+    \}
+
+    @T(1)
+    void trigger() \{
+        Pattern p;
+        if (pattern >= patterns.getPatternCount()) \{
+            position = 0;
+            return;
+        \}
+        p = patterns.getPattern(pattern);
+        position %= p.getRowCount();
+        int max = min(p.getColumnCount(), outs.length);
+        for (int i = 0; i < max; i++) \{
+            Argument arg = p.getValueAt(position, i);
+            if (arg != null) \{
+                outs\[i\].send(arg);
+            \}
+        \}
+        position++;
+        position %= p.getRowCount();
+    \}
+
+    @T(2)
+    void reset() \{
+        position = 0;
+    \}
+
+"
+    .patterns "0       0.1     0.1     0
+0
+0
+1       0
+0       0.1     0.2     1    
+1
+0       
+2       .       0
+"
+  }
+  @ ./PM3 audio:custom {
+    #%graph.x 794
+    #%graph.y 410
+    .code "
+
+    
+    @Out(1) AudioOut out;
+    
+    @UGen Osc mod;
+    @UGen LFO lfo;
+    @UGen OpGen car;
+    @UGen Gain amp;
+    
+    @P(1) @Type.Number(min=0, max=1)
+    double gain;
+    @P(2) @Type.Number(min=0, max=2) @Port(false)
+    double attack;
+    @P(3) @Type.Number(min=0, max=2, def=2) @Port(false)
+    double decay;
+    @P(4) @Type.Number(min=0, max=1, def=1) @Port(false)
+    double sustain;
+    @P(5) @Type.Number(min=0, max=2, def=0) @Port(false)
+    double release;
+    @P(6) @Type.Number(min=0, max=16, def=1) @Port(false)
+    double modRatio;
+    @P(7) @Type.Number(min=0, max=1) @Port(false)
+    double modLevel;
+    @P(8) @Type.Number(min=0, max=2) @Port(false)
+    double modAttack;
+    @P(9) @Type.Number(min=0, max=2, def=2) @Port(false)
+    double modDecay;
+    @P(10) @Type.Number(min=0, max=1, def=1) @Port(false)
+    double modSustain;
+    @P(11) @Type.Number(min=0, max=16, def=1) @Port(false)
+    double lfoFrequency;
+    @P(12) @Type.Number(min=0, max=1, def=0) @Port(false)
+    double lfoLevel;
+
+    @Inject Property modEnv, ampEnv;
+    @Inject double frequency, phase;
+    
+    @Override
+    public void setup() \{
+        car.function(new Function() \{
+
+            @Override
+            public double process(double d) \{
+                phase += (frequency / sampleRate) * TWO_PI;
+                while (phase > TWO_PI) \{
+                    phase -= TWO_PI;
+                \}
+                return sin(phase + (d * TWO_PI));
+            \}
+        \});
+
+        link(add(mod, lfo), car, amp, out);
+    \}
+
+    @Override
+    public void update() \{
+        mod.frequency(modRatio * frequency).gain(d(modEnv) * modLevel);
+        lfo.frequency(lfoFrequency).gain(lfoLevel);
+        double e = d(ampEnv);
+        e = e * e * gain;
+        amp.level(e);
+    \} 
+    
+    @In(1) void note(String note) \{
+        if (\"-\".equals(note)) \{
+            return;
+        \}
+        int midi = noteToMidi(note);
+        if (midi > 0) \{
+            noteOn(midi);
+        \} else \{
+            noteOff();
+        \}
+    \}
+    
+    void noteOn(int midi) \{
+        frequency = midiToFrequency(midi);
+        modEnv.to(1, modSustain).in(modAttack, modDecay);
+        ampEnv.to(1, sustain).in(attack, decay);
+    \}
+    
+    void noteOff() \{
+        ampEnv.to(0).in(release);
+    \}
+    
+
+    
+"
+    .gain 1.0
+    .decay 0.29032258064516137
+    .sustain 0.32258064516129026
+    .release 0.29032258064516125
+    .mod-ratio 1.5
+    .mod-level 0.2
+    .mod-attack 0.1774193548387097
+    .mod-decay 0.29032258064516137
+    .mod-sustain 0.37903225806451624
+    .lfo-frequency 6
+    .lfo-level 0.29838709677419356
+  }
+  @ ./level1 audio:analysis:level {
+    #%graph.x 1277
+    #%graph.y 26
+  }
+  @ ./send1 core:routing:send {
+    #%graph.x 1553
+    #%graph.y 60
+    .address /video/custom1.level-1
+  }
+  @ ./level2 audio:analysis:level {
+    #%graph.x 1130
+    #%graph.y 490
+  }
+  @ ./send2 core:routing:send {
+    #%graph.x 1251
+    #%graph.y 605
+    .address /video/custom1.level-2
+  }
+  @ ./level3 audio:analysis:level {
+    #%graph.x 1147
+    #%graph.y 670
+  }
+  @ ./send3 core:routing:send {
+    #%graph.x 1305
+    #%graph.y 806
+    .address /video/level3.value
+  }
+  ~ ./duo-osc!out ./overdrive1!in
+  ~ ./tracker1!out-1 ./mono-kit!level-1
+  ~ ./tracker1!out-1 ./mono-kit!play-1
+  ~ ./tracker1!out-2 ./mono-kit!level-2
+  ~ ./tracker1!out-2 ./mono-kit!play-2
+  ~ ./tracker1!out-3 ./mono-kit!level-3
+  ~ ./tracker1!out-4 ./mono-kit!level-4
+  ~ ./tracker1!out-3 ./mono-kit!play-3
+  ~ ./tracker1!out-4 ./mono-kit!play-4
+  ~ ./iterator1!out ./duo-osc!note
+  ~ ./freeverb1!out-1 ./output1!in-1
+  ~ ./freeverb1!out-2 ./output1!in-2
+  ~ ./gain1!out ./freeverb1!in-1
+  ~ ./gain1!out ./freeverb1!in-2
+  ~ ./gain3!out ./freeverb1!in-1
+  ~ ./gain3!out ./freeverb1!in-2
+  ~ ./gain2!out ./freeverb1!in-1
+  ~ ./gain2!out ./freeverb1!in-2
+  ~ ./gate1!out ./iterator2!trigger
+  ~ ./gate1!discard ./iterator3!trigger
+  ~ ./audio-clock!out ./order!in
+  ~ ./order!out-1 ./every!in
+  ~ ./order!out-2 ./iterator1!trigger
+  ~ ./order!out-2 ./gate1!in
+  ~ ./order!out-2 ./tracker1!trigger
+  ~ ./every!out ./sequence!trigger
+  ~ ./sequence!out-1 ./tracker1!pattern
+  ~ ./sequence!out-2 ./gain3!level
+  ~ ./sequence!out-3 ./gain1!level
+  ~ ./sequence!out-4 ./overdrive1!mix
+  ~ ./every!out ./gate1!retrigger
+  ~ ./iterator2!out ./PM3!note
+  ~ ./PM3!out ./mono-delay1!in
+  ~ ./iterator3!out ./PM3!note
+  ~ ./overdrive1!out ./level1!in
+  ~ ./level1!out ./gain1!in
+  ~ ./level1!level ./send1!in
+  ~ ./level2!level ./send2!in
+  ~ ./mono-delay1!out ./level2!in
+  ~ ./level2!out ./gain3!in
+  ~ ./level3!level ./send3!in
+  ~ ./mono-kit!out ./level3!in
+  ~ ./level3!out ./gain2!in
+}
