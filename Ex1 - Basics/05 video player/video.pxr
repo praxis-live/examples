@@ -1,25 +1,28 @@
 @ /video root:video {
   #%pxr.format 2
-  #%pxr.format 2
   #%autostart true
+  #%graph.comment Video Player\n\nPlay a video through a series of colour and\n3D transforms.\n\nNo video file included. Choose one using the\ncustom GUI.\n\nThe colourbalance and 3D transform components\nare currently available in the additional components\nrepository. See www.praxislive.org\n
   .renderer OpenGL
   .width 800
   .height 600
   @ ./output video:output {
-    #%graph.x 718
-    #%graph.y 157
+    #%graph.x 918
+    #%graph.y 105
+    .title "Video Player"
+    .always-on-top true
   }
   @ ./player video:player {
-    #%graph.x 115
-    #%graph.y 205
+    #%graph.x 234
+    #%graph.y 299
+    .video file:/home/nsigma/Videos/garden.avi
   }
   @ ./start-trigger1 core:start-trigger {
-    #%graph.x 26
-    #%graph.y 22
+    #%graph.x 25
+    #%graph.y 301
   }
   @ ./xform-3d video:gl:p3d {
-    #%graph.x 330
-    #%graph.y 143
+    #%graph.x 455
+    #%graph.y 89
     .code "
 
     @In(1)
@@ -65,8 +68,8 @@
     .scale 0.7903225806451613
   }
   @ ./xform-3d-m1 video:gl:p3d {
-    #%graph.x 500
-    #%graph.y 297
+    #%graph.x 703
+    #%graph.y 167
     .code "
 
     @In(1)
@@ -113,8 +116,8 @@
     .scale 2.0
   }
   @ ./colourbalance1 video:custom {
-    #%graph.x 295
-    #%graph.y 315
+    #%graph.x 456
+    #%graph.y 254
     .code "
 
     @In(1) PImage in;
@@ -141,8 +144,8 @@
     .blue 0.0
   }
   @ ./xform-3d-m2 video:gl:p3d {
-    #%graph.x 497
-    #%graph.y 477
+    #%graph.x 705
+    #%graph.y 330
     .code "
 
     @In(1)
@@ -189,8 +192,8 @@
     .scale 1.6935483870967742
   }
   @ ./colourbalance2 video:custom {
-    #%graph.x 296
-    #%graph.y 476
+    #%graph.x 456
+    #%graph.y 372
     .code "
 
     @In(1) PImage in;

@@ -1,32 +1,38 @@
 @ /video root:video {
   #%pxr.format 2
-  #%pxr.format 2
+  #%graph.comment Slideshow\n\nA simple slideshow example that fades\nbetween images in a folder.
+  #%graph.colors Green
   .width 400
   .height 300
   .fps 20.0
   @ ./screen video:output {
-    #%graph.x 784
-    #%graph.y 210
+    #%graph.x 700
+    #%graph.y 374
+    .title Slideshow
     .always-on-top true
   }
   @ ./image video:still {
-    #%graph.x 427
-    #%graph.y 173
+    #%graph.x 373
+    #%graph.y 303
     .image [file "resources/images/1.jpg"]
   }
   @ ./snap video:snapshot {
-    #%graph.x 619
-    #%graph.y 179
+    #%graph.x 537
+    #%graph.y 282
+    #%graph.comment A video:snap component grabs a still\nfrom the incoming video, with optional fade.\n\nNote trigger from image ready port, sent\nwhen image has been loaded.
+    #%graph.colors Orange
     .fade-time 4.5
   }
   @ ./timer core:timing:timer {
-    #%graph.x 73
-    #%graph.y 140
+    #%graph.x 24
+    #%graph.y 126
     .period 5
   }
   @ ./files core:array:iterator {
-    #%graph.x 245
-    #%graph.y 156
+    #%graph.x 173
+    #%graph.y 280
+    #%graph.comment A core:array:iterator cycles through a\nlist of images on every trigger from timer.\n\nNote use of \[file-list\] option on values\nto load file list from folder.
+    #%graph.colors Orange
     .values [file-list [file "resources/images/"]]
   }
   ~ ./image!ready ./snap!trigger

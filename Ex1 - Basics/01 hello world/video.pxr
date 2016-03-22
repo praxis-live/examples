@@ -1,20 +1,26 @@
 @ /video root:video {
+  #%pxr.format 2
   #%autostart true
+  #%graph.comment Hello World\n\nA simple video example piping a noise source through\na semi-transparent image.\n\nUse the play button above to start and stop the pipeline.\nUse the properties button above to change frame size,\nframe rate or renderer (software or OpenGL).
   .width 400
   .height 300
   .fps 20.0
   @ ./screen video:output {
-    #%graph.x 562
-    #%graph.y 158
+    #%graph.x 448
+    #%graph.y 351
+    #%graph.comment A video:output component.\n\nProvides properties for configuring the output\nwindow, such as frame title, full screen, scaling, etc.\n(changes require restarting pipeline).
+    #%graph.colors Purple
+    .title "Hello World"
+    .always-on-top true
   }
   @ ./image video:still {
-    #%graph.x 318
-    #%graph.y 159
+    #%graph.x 253
+    #%graph.y 238
     .image [file "resources/hello world.png"]
   }
   @ ./noise video:source:noise {
-    #%graph.x 98
-    #%graph.y 152
+    #%graph.x 62
+    #%graph.y 268
   }
   ~ ./image!out ./screen!in
   ~ ./noise!out ./image!in
