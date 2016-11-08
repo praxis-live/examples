@@ -4,20 +4,22 @@
     #%graph.x 875
     #%graph.y 273
   }
-  @ ./sine1 audio:sine {
+  @ ./sine1 audio:osc {
     #%graph.x 351
     #%graph.y 198
-    .frequency 701.049560546875
+    .waveform Square
+    .frequency 756.6955331617991
+    .level 0.5
   }
   @ ./gain1 audio:gain {
     #%graph.x 709
     #%graph.y 233
-    .level 1.7354234296362847E-4
+    .level 5.456044426185283E-14
   }
   @ ./animator1 core:timing:animator {
     #%graph.x 149
     #%graph.y 225
-    .value 701.0495707472962
+    .value 756.6955331617991
     .time 0.5
   }
   @ ./scale1 core:math:scale {
@@ -31,24 +33,17 @@
   @ ./blobX core:property {
     #%graph.x 27
     #%graph.y 38
-    .value 0.0390625
-  }
-  @ ./mono-delay1 audio:delay:mono-delay {
-    #%graph.x 493
-    #%graph.y 196
-    .time 0.30000001192092896
-    .feedback 0.4000000059604645
-    .mix 0.5
+    .value 0.6890625
   }
   @ ./blobWidth core:property {
     #%graph.x 40
     #%graph.y 394
-    .value 0.0625
+    .value 0.03125
   }
   @ ./animator2 core:timing:animator {
     #%graph.x 519
     #%graph.y 379
-    .value 1.7354234926102247E-4
+    .value 5.456044426185283E-14
     .time 0.5
   }
   @ ./scale2 core:math:scale {
@@ -58,14 +53,20 @@
     .x2 0.2
     .y2 0.5
   }
+  @ ./delay-1 audio:fx:delay {
+    #%graph.x 519
+    #%graph.y 209
+    .time 0.3
+    .feedback 0.4
+  }
   ~ ./gain1!out ./output1!in-1
   ~ ./output1!in-2 ./gain1!out
-  ~ ./mono-delay1!out ./gain1!in
-  ~ ./sine1!out ./mono-delay1!in
   ~ ./blobX!out ./scale1!in
   ~ ./scale1!out ./animator1!to
   ~ ./animator1!out ./sine1!frequency
   ~ ./animator2!out ./gain1!level
   ~ ./blobWidth!out ./scale2!in
   ~ ./scale2!out ./animator2!to
+  ~ ./sine1!out ./delay-1!in-1
+  ~ ./delay-1!out-1 ./gain1!in
 }

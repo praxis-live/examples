@@ -14,7 +14,8 @@ Many components you can access and alter their code on-the-fly. Right-click on t
 
 #### Hello World PL2
 
-Say hello to Praxis LIVE version 2! Showcasing some new features including revised shader (GLSL) and Processing 3D support.
+Say hello to Praxis LIVE! Showcasing features that appeared in v2, including revised shader (GLSL) and Processing 3D support.
+
 
 ### Basics /
 
@@ -60,9 +61,15 @@ Shape ported from http://processing.org/examples/texturecylinder.html
 
 ### Audio
 
-#### audio seq
+#### jazzy synthesis
 
-This project provides a simple drum machine and bass line with changing FX, as well as a visualization of the sound.
+Showing the audio coding features (substractive and PM synthesis) and the use of the new tracker component for sequencing. A few `core:array:iterator` components are used to create a constantly changing improvisation.
+
+Synths from this project are available in the custom components collection.
+
+#### funky origami
+
+Showing new features in v3 for working with binary data. A custom FFT component sends frequency data to be rendered as 3D shapes.
 
 #### blob theremin
 
@@ -70,9 +77,6 @@ This project provides a simple drum machine and bass line with changing FX, as w
 
 A simple blob tracking example controlling a sine wave. Give the camera 10s to adjust to the background before you start moving!
 
-#### jazzy synthesis **NEW**
-
-Showcasing the new audio coding features (substractive and PM synthesis) and the use of the new tracker component for sequencing. A few `core:array:iterator` components are used to create a constantly changing improvisation.
 
 ### TinkerForge
 

@@ -1,0 +1,782 @@
+@ /audio root:audio {
+  #%pxr.format 2
+  #%graph.colors Purple
+  #%graph.comment FUNKY ORIGAMI - audio patch\n\nExample demonstrating new coding features in v3 including\nsupport for lists and binary data for sending FFT data.
+  @ ./output-1 audio:output {
+    #%graph.x 1519
+    #%graph.y 338
+  }
+  @ ./duo-osc audio:custom {
+    #%graph.x 779
+    #%graph.y 310
+    .code "
+
+    final String SW = \"Saw\";
+    final String SQ = \"Square\";
+    
+    @Out(1) AudioOut out;
+    
+    @UGen Osc osc, osc2;
+    @UGen IIRFilter filter;
+    @UGen Gain amp;
+    
+    @P(1) @Type.String(allowed = \{SW, SQ\}) @OnChange(\"updateWaves\") @Port(false)
+    String waveform1;
+    @P(2) @Type.String(allowed = \{SW, SQ\}) @OnChange(\"updateWaves\") @Port(false)
+    String waveform2;
+    @P(3) @Type.Number(min=0, max=1, def=1)
+    double level;
+    @P(4) @Type.Number(min=0, max=1, def=0) @Port(false)
+    double osc2Level;
+    @P(5) @Type.Integer(min=-24, max=24, def=-12) 
+    int osc2Transpose;
+    @P(6) @Type.Number(min=110, max=8000, def=8000)
+    double cutoff;
+    @P(7) @Type.Number(min=0, max=20)
+    double resonance;
+    @P(8) @Type.Number(min=0, max=2)
+    double attack;
+    @P(9) @Type.Number(min=0, max=2, def=2)
+    double decay;
+    @P(10) @Type.Number(min=0, max=1, def=1)
+    double sustain;
+    @P(11) @Type.Number(min=0, max=2, def=0)
+    double release;
+    @P(12) @Type.Number(min=0, max=1) @Port(false)
+    double filterMod;
+    @P(13) @Type.Number(min=0, max=1, def=1) @Port(false)
+    double ampMod;
+
+    @Inject Property freq1, freq2, env;
+    
+    @Override
+    public void setup() \{
+        updateWaves();
+        filter.type(IIRFilter.LP12);
+        link(add(osc, osc2), filter, amp, out);
+    \}
+
+    @Override
+    public void update() \{
+        double hz = d(freq1);
+        osc.frequency(hz);
+        osc2.frequency(d(freq2)).gain(osc2Level * osc2Level);
+        double e = d(env);
+        hz = (e * hz * 7) + hz;
+        hz = (filterMod * hz) + ((1 - filterMod) * cutoff);
+        filter.frequency(hz).resonance(resonance);
+        e = e < 0.001 ? 0 : (ampMod * e * e) + (1 - ampMod);
+        e = e * level * level;
+        amp.level(e);
+    \} 
+    
+    @In(1) void note(String note) \{
+        if (\"-\".equals(note)) \{
+            return;
+        \}
+        int midi = noteToMidi(note);
+        if (midi > 0) \{
+            noteOn(midi);
+        \} else \{
+            noteOff();
+        \}
+    \}
+    
+    void noteOn(int midi) \{
+        double f = midiToFrequency(midi);
+        freq1.set(f);
+        double f2 = midiToFrequency(midi + osc2Transpose);
+        freq2.set(f2);
+        env.to(1,sustain).in(attack,decay);
+    \}
+    
+    void noteOff() \{
+        env.to(0).in(release);
+    \}
+    
+    void updateWaves() \{
+        osc.waveform(SQ.equals(waveform1) ? SQUARE : SAW);
+        osc2.waveform(SQ.equals(waveform2) ? SQUARE : SAW);
+    \}
+    
+"
+    .waveform-2 Square
+    .osc-2-level 0.8
+    .cutoff 5009.435483870968
+    .resonance 16.451612903225808
+    .decay 0.3225806451612903
+    .sustain 0.532258064516129
+    .release 0.3387096774193548
+    .filter-mod 1.0
+  }
+  @ ./clock-1 audio:clock {
+    #%graph.x 49
+    #%graph.y 194
+    .bpm 130
+  }
+  @ ./custom-1 core:custom {
+    #%graph.x 335
+    #%graph.y 218
+    #%graph.comment Custom component sends notes and\ncontrol data to synths.\n\nRight-click and edit code to see /\nchange what it's doing.
+    .code "import java.util.stream.*;
+
+
+    @Out(1)
+    Output out1;
+    @Out(2)
+    Output out2;
+    @Out(3)
+    Output pmAttack;
+    @Out(4)
+    Output pmModRatio;
+    @Out(5)
+    Output oscTranspose;
+
+    @Inject
+    int idx;
+
+    @Inject
+    List<String> notes1, notes2;
+
+    @Override
+    public void update() \{
+        if (notes1.isEmpty()) \{
+            recalculate();
+        \}
+    \}
+
+    @T(1)
+    void trigger() \{
+        if (notes1.size() > 7) \{
+            pmAttack.send(randomOf(0, 0.05));
+            pmModRatio.send(randomOf(3, 4.5, 6, 9));
+            oscTranspose.send(randomOf(-12,7,12));
+        \} else \{
+            pmAttack.send(0);
+            pmModRatio.send(3);
+            oscTranspose.send(-12);
+        \}
+        out1.send(notes1.get(idx % notes1.size()));
+        out2.send(notes2.get(idx % notes2.size()));
+        idx++;
+    \}
+
+    @T(2)
+    void bar() \{
+        idx = 0;
+        Collections.rotate(notes1, 1);
+        Collections.rotate(notes2, 2);
+        notes1.add(randomOf(\"a3\", \"c3\", \"d3\", \"e3\", \"x\", \"-\"));
+        notes2.add(randomOf(\"a2\", \"g2\", \"c2\", \"x\", \"-\"));
+    \}
+
+    @T(3)
+    void recalculate() \{
+        notes1 = Stream.of(randomOf(\"d3\", \"e3\"), \"-\", \"x\").collect(Collectors.toList());
+        notes2 = Stream.of(randomOf(\"a2\", \"g2\"), \"x\", \"x\").collect(Collectors.toList());
+    \}
+
+"
+  }
+  @ ./every-1 core:routing:every {
+    #%graph.x 64
+    #%graph.y 282
+    #%graph.minimized true
+    .count 16
+  }
+  @ ./PM3 audio:custom {
+    #%graph.x 649
+    #%graph.y 202
+    .code "
+
+    @Out(1) AudioOut out;
+    
+    @UGen Osc mod;
+    @UGen LFO lfo;
+    @UGen LFO car;
+    @UGen Gain amp;
+    
+    @P(1) @Type.Number(min=0, max=1, def=1)
+    double level;
+    @P(2) @Type.Number(min=0, max=2)
+    double attack;
+    @P(3) @Type.Number(min=0, max=2, def=2) @Port(false)
+    double decay;
+    @P(4) @Type.Number(min=0, max=1, def=1) @Port(false)
+    double sustain;
+    @P(5) @Type.Number(min=0, max=2, def=0) @Port(false)
+    double release;
+    @P(6) @Type.Number(min=0, max=16, def=1)
+    double modRatio;
+    @P(7) @Type.Number(min=0, max=1) @Port(false)
+    double modLevel;
+    @P(8) @Type.Number(min=0, max=2) @Port(false)
+    double modAttack;
+    @P(9) @Type.Number(min=0, max=2, def=2) @Port(false)
+    double modDecay;
+    @P(10) @Type.Number(min=0, max=1, def=1) @Port(false)
+    double modSustain;
+    @P(11) @Type.Number(min=0, max=16, def=1) @Port(false)
+    Property lfoFrequency;
+    @P(12) @Type.Number(min=0, max=1, def=0) @Port(false)
+    Property lfoLevel;
+
+    @Inject Property frequency, modEnv, ampEnv;
+    
+    @Override
+    public void setup() \{
+        car.waveform(SAW);
+        frequency.link(car::frequency);
+        ampEnv.link(d -> amp.level(d*d));
+        lfoFrequency.link(lfo::frequency);
+        lfoLevel.link(lfo::gain);
+        link(car, modFn(add(mod, lfo), (m,c) -> sin((m+c) * TWO_PI)), amp, out);
+    \}
+
+    @Override
+    public void update() \{
+        mod.frequency(modRatio * d(frequency)).gain(d(modEnv) * modLevel);
+    \} 
+    
+    @In(1) void note(String note) \{
+        if (\"-\".equals(note)) \{
+            return;
+        \}
+        int midi = noteToMidi(note);
+        if (midi > 0) \{
+            noteOn(midi);
+        \} else \{
+            noteOff();
+        \}
+    \}
+    
+    void noteOn(int midi) \{
+        frequency.set(midiToFrequency(midi));
+        modEnv.to(1, modSustain).in(modAttack, modDecay);
+        ampEnv.to(1, sustain).in(attack, decay);
+    \}
+    
+    void noteOff() \{
+        ampEnv.to(0).in(release);
+    \}
+      
+"
+    .decay 0.45161290322580644
+    .sustain 0.25
+    .release 0.08064516129032258
+    .mod-ratio 3.0
+    .mod-level 0.2
+    .mod-decay 0.4
+    .mod-sustain 0.21774193548387097
+    .lfo-frequency 2
+    .lfo-level 0.6370967741935484
+  }
+  @ ./chorus-1 audio:fx:chorus {
+    #%graph.x 779
+    #%graph.y 162
+    .depth 2.4
+    .rate 0.4
+    .feedback 0.4
+  }
+  @ ./reverb-1 audio:fx:reverb {
+    #%graph.x 1172
+    #%graph.y 202
+    .room-size 0.5483870967741935
+    .damp 0.5564516129032258
+    .width 0.8709677419354839
+    .wet 0.2
+  }
+  @ ./fft audio:custom {
+    #%graph.x 1172
+    #%graph.y 619
+    #%graph.comment Custom FFT component sends\nfrequency data to video patch.\n\nGPL code ported from Beads\nhttp://www.beadsproject.net\n(c) Holger Crysandt / Ollie Bown
+    .code "import org.jaudiolibs.pipes.Buffer;
+import org.jaudiolibs.pipes.impl.SingleInOut;
+import java.io.*;
+
+
+    @In(1)
+    AudioIn in;
+    @Out(1)
+    AudioOut out;
+    @AuxOut(1)
+    Output powerData;
+
+    float\[\] fftReal;
+    float\[\] fftImag;
+    float\[\] power;
+    float\[\] powerAvg;
+    float\[\] dataCopy;
+
+    int writeIdx;
+    boolean send;
+
+    @Override
+    public void setup() \{
+        dataCopy = new float\[blockSize * 16\]; // 1024
+        power = new float\[dataCopy.length / 2\];
+        powerAvg = new float\[blockSize / 2\];
+        link(in, new FFT(), out);
+    \}
+
+    @Override
+    public void update() \{
+        if (send) \{
+            send = false;
+            try \{
+                PBytes.OutputStream bos = new PBytes.OutputStream(powerAvg.length * 4);
+                ObjectOutputStream oos = new ObjectOutputStream(bos);
+                oos.writeObject(powerAvg);
+                oos.close();
+                powerData.send(bos.toBytes());
+            \} catch (Exception ex) \{
+                log(ERROR, ex);
+            \}
+        \}
+    \}
+
+    class FFT extends SingleInOut \{
+
+        @Override
+        protected void process(Buffer buffer, boolean bln) \{
+            arrayCopy(buffer.getData(), 0, dataCopy, writeIdx, blockSize);
+            writeIdx += blockSize;
+            if (writeIdx >= dataCopy.length) \{
+                fft(dataCopy, dataCopy.length, true);
+                fftReal = calculateReal(dataCopy, dataCopy.length);
+                fftImag = calculateImaginary(dataCopy, dataCopy.length);
+                for (int i = 0; i < power.length; i++) \{
+                    power\[i\] = (float) sqrt(fftReal\[i\] * fftReal\[i\] + fftImag\[i\] * fftImag\[i\]);
+                \}
+
+                int avgWidth = (int) power.length / powerAvg.length;
+                for (int i = 0; i < powerAvg.length; i++) \{
+                    float avg = 0;
+                    int j;
+                    for (j = 0; j < avgWidth; j++) \{
+                        int offset = j + i * avgWidth;
+                        if (offset < power.length) \{
+                            avg += power\[offset\];
+                        \} else \{
+                            break;
+                        \}
+                    \}
+                    avg /= j + 1;
+                    powerAvg\[i\] = avg;
+                \}
+
+                send = true;
+                writeIdx = 0;
+            \}
+        \}
+
+    \}
+
+    protected static void fft(float\[\] data, int n, boolean isign) \{
+        float c1 = 0.5f;
+        float c2, h1r, h1i, h2r, h2i;
+        double wr, wi, wpr, wpi, wtemp;
+        double theta = 3.141592653589793 / (n >> 1);
+        if (isign) \{
+            c2 = -.5f;
+            four1(data, n >> 1, true);
+        \} else \{
+            c2 = .5f;
+            theta = -theta;
+        \}
+        wtemp = Math.sin(.5 * theta);
+        wpr = -2. * wtemp * wtemp;
+        wpi = Math.sin(theta);
+        wr = 1. + wpr;
+        wi = wpi;
+        int np3 = n + 3;
+        for (int i = 2, imax = n >> 2, i1, i2, i3, i4; i <= imax; ++i) \{
+            i4 = 1 + (i3 = np3 - (i2 = 1 + (i1 = i + i - 1)));
+            --i4;
+            --i2;
+            --i3;
+            --i1;
+            h1i = c1 * (data\[i2\] - data\[i4\]);
+            h2r = -c2 * (data\[i2\] + data\[i4\]);
+            h1r = c1 * (data\[i1\] + data\[i3\]);
+            h2i = c2 * (data\[i1\] - data\[i3\]);
+            data\[i1\] = (float) (h1r + wr * h2r - wi * h2i);
+            data\[i2\] = (float) (h1i + wr * h2i + wi * h2r);
+            data\[i3\] = (float) (h1r - wr * h2r + wi * h2i);
+            data\[i4\] = (float) (-h1i + wr * h2i + wi * h2r);
+            wr = (wtemp = wr) * wpr - wi * wpi + wr;
+            wi = wi * wpr + wtemp * wpi + wi;
+        \}
+        if (isign) \{
+            float tmp = data\[0\];
+            data\[0\] += data\[1\];
+            data\[1\] = tmp - data\[1\];
+        \} else \{
+            float tmp = data\[0\];
+            data\[0\] = c1 * (tmp + data\[1\]);
+            data\[1\] = c1 * (tmp - data\[1\]);
+            four1(data, n >> 1, false);
+        \}
+    \}
+
+    private static void four1(float data\[\], int nn, boolean isign) \{
+        int n, mmax, istep;
+        double wtemp, wr, wpr, wpi, wi, theta;
+        float tempr, tempi;
+
+        n = nn << 1;
+        for (int i = 1, j = 1; i < n; i += 2) \{
+            if (j > i) \{
+                // SWAP(data\[j\], data\[i\]);
+                float swap = data\[j - 1\];
+                data\[j - 1\] = data\[i - 1\];
+                data\[i - 1\] = swap;
+                // SWAP(data\[j+1\], data\[i+1\]);
+                swap = data\[j\];
+                data\[j\] = data\[i\];
+                data\[i\] = swap;
+            \}
+            int m = n >> 1;
+            while (m >= 2 && j > m) \{
+                j -= m;
+                m >>= 1;
+            \}
+            j += m;
+        \}
+        mmax = 2;
+        while (n > mmax) \{
+            istep = mmax << 1;
+            theta = 6.28318530717959 / mmax;
+            if (!isign) \{
+                theta = -theta;
+            \}
+            wtemp = Math.sin(0.5 * theta);
+            wpr = -2.0 * wtemp * wtemp;
+            wpi = Math.sin(theta);
+            wr = 1.0;
+            wi = 0.0;
+            for (int m = 1; m < mmax; m += 2) \{
+                for (int i = m; i <= n; i += istep) \{
+                    int j = i + mmax;
+                    tempr = (float) (wr * data\[j - 1\] - wi * data\[j\]);
+                    tempi = (float) (wr * data\[j\] + wi * data\[j - 1\]);
+                    data\[j - 1\] = data\[i - 1\] - tempr;
+                    data\[j\] = data\[i\] - tempi;
+                    data\[i - 1\] += tempr;
+                    data\[i\] += tempi;
+                \}
+                wr = (wtemp = wr) * wpr - wi * wpi + wr;
+                wi = wi * wpr + wtemp * wpi + wi;
+            \}
+            mmax = istep;
+        \}
+    \}
+
+    protected static float\[\] calculateReal(float\[\] spectrum, int length) \{
+        float\[\] real = new float\[length\];
+        real\[0\] = spectrum\[0\];
+        real\[real.length / 2\] = spectrum\[1\];
+        for (int i = 1, j = real.length - 1; i < j; ++i, --j) \{
+            real\[j\] = real\[i\] = spectrum\[2 * i\];
+        \}
+        return real;
+    \}
+
+    protected static float\[\] calculateImaginary(float\[\] spectrum, int length) \{
+        float\[\] imag = new float\[length\];
+        for (int i = 1, j = imag.length - 1; i < j; ++i, --j) \{
+            imag\[i\] = -(imag\[j\] = spectrum\[2 * i + 1\]);
+        \}
+        return imag;
+    \}
+
+
+"
+  }
+  @ ./mixer-6s audio:custom {
+    #%graph.x 995
+    #%graph.y 162
+    .code "
+
+    @In(1) AudioIn in1l;
+    @In(2) AudioIn in1r;
+    @In(3) AudioIn in2l;
+    @In(4) AudioIn in2r;
+    @In(5) AudioIn in3l;
+    @In(6) AudioIn in3r;
+    @In(7) AudioIn in4l;
+    @In(8) AudioIn in4r;
+    @In(9) AudioIn in5l;
+    @In(10) AudioIn in5r;
+    @In(11) AudioIn in6l;
+    @In(12) AudioIn in6r;
+    
+    @Out(1) AudioOut out1;
+    @Out(2) AudioOut out2;
+    
+    @P(1) @Type.Number(min=0, max=2, skew=4) double level1;
+    @P(2) @Type.Number(min=0, max=2, skew=4) double level2;
+    @P(3) @Type.Number(min=0, max=2, skew=4) double level3;
+    @P(4) @Type.Number(min=0, max=2, skew=4) double level4;
+    @P(5) @Type.Number(min=0, max=2, skew=4) double level5;
+    @P(6) @Type.Number(min=0, max=2, skew=4) double level6;
+    
+    @P(7) boolean mute1;
+    @P(8) boolean mute2;
+    @P(9) boolean mute3;
+    @P(10) boolean mute4;
+    @P(11) boolean mute5;
+    @P(12) boolean mute6;
+    
+    @UGen Gain g1l,g1r,g2l,g2r,g3l,g3r,g4l,g4r,g5l,g5r,g6l,g6r;
+    
+    @Override
+    public void setup() \{
+        link(
+            add(
+                link(in1l, g1l),
+                link(in2l, g2l),
+                link(in3l, g3l),
+                link(in4l, g4l),
+                link(in5l, g5l),
+                link(in6l, g6l)
+            ),
+            out1
+        );
+        link(
+            add(
+                link(in1r, g1r),
+                link(in2r, g2r),
+                link(in3r, g3r),
+                link(in4r, g4r),
+                link(in5r, g5r),
+                link(in6r, g6r)
+            ),
+            out2
+        );
+    \}
+
+    @Override
+    public void update() \{
+        g1l.level(mute1 ? 0 : level1);
+        g1r.level(mute1 ? 0 : level1);
+        g2l.level(mute2 ? 0 : level2);
+        g2r.level(mute2 ? 0 : level2);
+        g3l.level(mute3 ? 0 : level3);
+        g3r.level(mute3 ? 0 : level3);
+        g4l.level(mute4 ? 0 : level4);
+        g4r.level(mute4 ? 0 : level4);
+        g5l.level(mute5 ? 0 : level5);
+        g5r.level(mute5 ? 0 : level5);
+        g6l.level(mute6 ? 0 : level6);
+        g6r.level(mute6 ? 0 : level6);
+    \}
+"
+    .level-1 0.075
+    .level-2 0.075
+    .level-3 0.4
+    .mute-1 true
+    .mute-2 true
+  }
+  @ ./send-1 core:routing:send {
+    #%graph.x 1172
+    #%graph.y 708
+    .address /video/fft-vis.fft
+  }
+  @ ./mono-kit audio:custom {
+    #%graph.x 773
+    #%graph.y 569
+    .code "
+
+    @Out(1)
+    AudioOut out;
+    
+    @P(1) @OnChange(\"updateTables\") @Port(false)
+    Table sample1;
+    @P(2) @OnChange(\"updateTables\") @Port(false)
+    Table sample2;
+    @P(3) @OnChange(\"updateTables\") @Port(false)
+    Table sample3;
+    @P(4) @OnChange(\"updateTables\") @Port(false)
+    Table sample4;
+    @P(5) @OnChange(\"updateTables\") @Port(false)
+    Table sample5;
+    @P(6) @OnChange(\"updateTables\") @Port(false)
+    Table sample6;
+
+    @P(7) @Type.Number(min=0, max=1, def=1) @OnChange(\"updateLevels\")
+    double level1;
+    @P(8) @Type.Number(min=0, max=1, def=1) @OnChange(\"updateLevels\")
+    double level2;
+    @P(9) @Type.Number(min=0, max=1, def=1) @OnChange(\"updateLevels\")
+    double level3;
+    @P(10) @Type.Number(min=0, max=1, def=1) @OnChange(\"updateLevels\")
+    double level4;
+    @P(11) @Type.Number(min=0, max=1, def=1) @OnChange(\"updateLevels\")
+    double level5;
+    @P(12) @Type.Number(min=0, max=1, def=1) @OnChange(\"updateLevels\")
+    double level6;
+    
+    @UGen
+    Player pl1, pl2, pl3, pl4, pl5, pl6;
+    @UGen
+    Gain g1, g2, g3, g4, g5, g6;
+
+    @Override
+    public void setup() \{
+        updateTables();
+        updateLevels();
+        link(
+                add(
+                        link(pl1, g1),
+                        link(pl2, g2),
+                        link(pl3, g3),
+                        link(pl4, g4),
+                        link(pl5, g5),
+                        link(pl6, g6)
+                ),
+                out     
+        );
+    \}
+    
+    void updateTables() \{
+        pl1.table(sample1);
+        pl2.table(sample2);
+        pl3.table(sample3);
+        pl4.table(sample4);
+        pl5.table(sample5);
+        pl6.table(sample6);
+    \}
+    
+    void updateLevels() \{
+        g1.level(level1 * level1);
+        g2.level(level2 * level2);
+        g3.level(level3 * level3);
+        g4.level(level4 * level4);
+        g5.level(level5 * level5);
+        g6.level(level6 * level6);
+    \}
+    
+    @T(1) void play1() \{
+        pl1.play();
+    \}
+    
+    @T(2) void play2() \{
+        pl2.speed(randomOf(-1,-0.5,1,1,2,3));
+        pl2.play();
+    \}
+    
+    @T(3) void play3() \{
+        pl3.play();
+    \}
+    
+    @T(4) void play4() \{
+        pl4.play();
+    \}
+    
+    @T(5) void play5() \{
+        pl5.play();
+    \}
+    
+    @T(6) void play6() \{
+        pl6.play();
+    \}
+    
+"
+    .sample-1 [file "resources/Kick_Reg_1b.wav"]
+    .sample-2 [file "resources/Snare_Reg_1a.wav"]
+    .sample-3 [file "resources/HH_2_open.wav"]
+    .sample-4 [file "resources/HH_2_closed_a.wav"]
+    .level-1 0.9090909090909091
+    .level-3 0.6848484848484848
+    .level-4 0.696969696969697
+  }
+  @ ./bd core:routing:gate {
+    #%graph.x 335
+    #%graph.y 582
+    #%graph.minimized true
+    .active true
+    .pattern [array 1 0 0.2]
+  }
+  @ ./sn core:routing:gate {
+    #%graph.x 335
+    #%graph.y 643
+    #%graph.minimized true
+    .active true
+    .pattern [array 0 0 0 0 1 0.2 0.3 0.7]
+  }
+  @ ./hh core:routing:gate {
+    #%graph.x 335
+    #%graph.y 708
+    #%graph.minimized true
+    .active true
+    .pattern [array 0 0 0.6 0.1 0]
+  }
+  @ ./every-4 core:routing:every {
+    #%graph.x 64
+    #%graph.y 338
+    #%graph.minimized true
+    .count 4
+  }
+  @ ./sequence core:tracker {
+    #%graph.x 47
+    #%graph.y 516
+    #%graph.comment Tracker component used to\ncontrol mutes and\ntrigger recalculation
+    #%graph.minimized true
+    .patterns "0 1 1 \"*\"
+. 0 . \"*\"
+. . 0 \"*\"
+1 . . .
+0 . . \"*\"
+.
+. . . \"*\"
+.
+1 1 . \"*\"
+. 0 . .
+0 . . .
+.
+. . . \"*\"
+.
+. 1 1 .
+1 . . .
+"
+  }
+  ~ ./clock-1!out ./every-1!in
+  ~ ./PM3!out ./chorus-1!in-1
+  ~ ./PM3!out ./chorus-1!in-2
+  ~ ./output-1!in-1 ./reverb-1!out-1
+  ~ ./reverb-1!out-2 ./fft!in
+  ~ ./fft!out ./output-1!in-2
+  ~ ./chorus-1!out-1 ./mixer-6s!in-1l
+  ~ ./chorus-1!out-2 ./mixer-6s!in-1r
+  ~ ./mixer-6s!out-1 ./reverb-1!in-1
+  ~ ./mixer-6s!out-2 ./reverb-1!in-2
+  ~ ./fft!power-data ./send-1!in
+  ~ ./mono-kit!out ./mixer-6s!in-3l
+  ~ ./mono-kit!out ./mixer-6s!in-3r
+  ~ ./bd!out ./mono-kit!play-1
+  ~ ./sn!out ./mono-kit!play-2
+  ~ ./hh!out ./mono-kit!play-3
+  ~ ./hh!discard ./mono-kit!play-4
+  ~ ./custom-1!out-1 ./PM3!note
+  ~ ./custom-1!out-2 ./duo-osc!note
+  ~ ./duo-osc!out ./mixer-6s!in-2l
+  ~ ./duo-osc!out ./mixer-6s!in-2r
+  ~ ./custom-1!pm-attack ./PM3!attack
+  ~ ./custom-1!pm-mod-ratio ./PM3!mod-ratio
+  ~ ./custom-1!osc-transpose ./duo-osc!osc-2-transpose
+  ~ ./every-1!out ./every-4!in
+  ~ ./every-1!out ./custom-1!bar
+  ~ ./clock-1!out ./custom-1!trigger
+  ~ ./clock-1!out ./bd!in
+  ~ ./clock-1!out ./sn!in
+  ~ ./clock-1!out ./hh!in
+  ~ ./every-1!out ./bd!retrigger
+  ~ ./every-1!out ./sn!retrigger
+  ~ ./every-1!out ./hh!retrigger
+  ~ ./sequence!out-1 ./mixer-6s!mute-1
+  ~ ./sequence!out-2 ./mixer-6s!mute-2
+  ~ ./sequence!out-3 ./mixer-6s!mute-3
+  ~ ./sequence!trigger ./every-4!out
+  ~ ./custom-1!recalculate ./sequence!out-4
+}

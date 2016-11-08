@@ -1,0 +1,85 @@
+@ /video root:video {
+  #%pxr.format 2
+  #%graph.colors Green
+  #%graph.comment FUNKY ORIGAMI - video patch\n\nSingle video sketch accepts FFT data from audio\npatch and renders 3D shapes.
+  .renderer OpenGL
+  .width 1024
+  .height 768
+  @ ./output-1 video:output {
+    #%graph.x 602
+    #%graph.y 159
+    .title "FUNKY ORIGAMI"
+    .always-on-top true
+  }
+  @ ./fft-vis video:gl:p3d {
+    #%graph.x 232
+    #%graph.y 159
+    .code "
+
+    @In(1)
+    PImage in;
+
+    @Inject Property x, y, z;
+    
+    @P(0) float\[\] fft;
+
+    int tubeRes = 24;
+    double\[\] tubeX = new double\[tubeRes\];
+    double\[\] tubeY = new double\[tubeRes\];
+
+    @Override
+    public void setup() \{
+        double angle = 360.0 / tubeRes;
+        for (int i = 0; i < tubeRes; i++) \{
+            tubeX\[i\] = cos(radians(i * angle));
+            tubeY\[i\] = sin(radians(i * angle));
+        \}
+        noStroke();
+    \}
+
+    @Override
+    public void draw() \{
+        if (!x.isAnimating()) \{
+            x.to(random(1)).in(randomOf(1,2,4)).easeInOut();
+            y.to(random(1)).in(1).easeInOut();
+            z.to(random(1)).in(2).easeInOut();
+        \}
+        
+        pushMatrix();
+        translate(width/2, height/2);
+        scale(-1.05);
+        blendMode(ADD);
+        tint(240,220,200,200);
+        image(in,-width/2,-height/2);
+        blendMode(BLEND);
+        popMatrix();
+        if (fft.length < tubeRes + 2) \{
+            return;
+        \}
+        translate(width / 2, height / 2);
+        scale(2.5);
+        rotateX(map(d(x), 0, 1, -PI, PI));
+        rotateY(map(d(y), 0, 1, -PI, PI));
+        rotateZ(map(d(z), 0, 1, -PI, PI));
+        beginShape(TRIANGLE_FAN);
+        for (int i = 0; i < tubeRes; i++) \{
+            double x = tubeX\[i\] * 100;
+            double z = tubeY\[i\] * 100;
+            double u = in.width - (in.width / tubeRes * i);
+            fill(i*27%255, i*37%255, 255-(i*17%255), 100);
+            stroke(i*27%255, i*37%255, 255-(i*17%255), 200);
+            vertex(x, -100, z, u, 0);
+            vertex(x, -100 + min(150,(fft\[i+2\]) * 300), z, u, in.height);
+        \}
+        endShape();
+        
+
+    \}
+"
+    .fft "rO0ABXVyAAJbRgucgYki4AxCAgAAeHAAAAAgP5EWcD4It9w94K3XPcKGPT469lY9+6T1PqowKD5O
+co0+m50tPn6WMz6IAms+3G/uPoviGz5mEZs+Y7SoPnWUCz4t4Ek+F/VYPhTJQz4SZEg9wXUEPdGd
+Pj2nInk9O/Y3PS8scj1EEbg9ChIgPSLn7zyUp/E8gX03PL1fEjyd/0k="
+  }
+  ~ ./fft-vis!out ./fft-vis!in
+  ~ ./fft-vis!out ./output-1!in
+}

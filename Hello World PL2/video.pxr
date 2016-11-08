@@ -1,6 +1,5 @@
 @ /video root:video {
   #%pxr.format 2
-  #%pxr.format 2
   .renderer OpenGL
   .width 1024
   .height 768
@@ -56,7 +55,7 @@
         image(in, -w2, -h2);
     \}
 "
-    .scale 0.07663030519333289
+    .scale 0.3560881684434867
   }
   @ ./scene-ctrl core:custom {
     #%graph.x 60
@@ -371,7 +370,7 @@ uniform float frequency;
                 vec2 pos = 0.5 - vertTexCoord.st;  
                 gl_FragColor = texture2D(texture, texCoords); 
             \}"
-    .amplitude 0.001616288595979203
+    .amplitude 0.01152674820847794
   }
   @ ./colourbalance video:custom {
     #%graph.x 269
