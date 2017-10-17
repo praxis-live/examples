@@ -1,0 +1,8 @@
+
+# <<<BUILD>>>
+include [file "audio.pxr"]
+include [file "video.pxr"]
+
+# <<<RUN>>>
+include [file "config/audio_autostart"]
+include [file "config/video_autostart"]

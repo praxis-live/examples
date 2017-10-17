@@ -1,0 +1,69 @@
+@ /video root:video {
+  #%pxr.format 2
+  #%graph.comment A simple circle drawing example ported from a \nPharo (Smalltalk) example by Serge Stinckwich.\nhttps://youtu.be/IphXSTIfaY0\n\nTry editing the code, or swapping in the 3D version.
+  .renderer OpenGL
+  .width 1024
+  .height 768
+  .fps 60
+  @ ./output-1 video:output {
+    #%graph.x 283
+    #%graph.y 180
+    .title Spiral
+    .always-on-top true
+    .show-cursor true
+  }
+  @ ./circles2d video:gl:p2d {
+    #%graph.x 28
+    #%graph.y 142
+    .code "
+
+    @Override
+    public void draw() \{
+        int numCircles = 1000;
+        double t = millis() / 1000.0 * 0.2;
+        double c = 60;
+        noStroke();
+        colorMode(HSB);
+        translate(width/2, height/2);
+        for (int i = 0; i < numCircles; i++) \{
+            fill( (i * abs(t) % 255), 255, 230);
+            pushMatrix();
+            rotate(radians((t + 100) * i));
+            translate(sqrt(c*i), sqrt(c*i));
+            ellipse(0,0,16,16);
+            popMatrix();
+        \}
+    \}
+"
+  }
+  @ ./circles3d video:gl:p3d {
+    #%graph.x 28
+    #%graph.y 221
+    .code "
+
+    @Override
+    public void draw() \{
+        lights();
+        int numCircles = 400;
+        double t = sin(millis() / 1000.0 * 0.2);
+        double c = 240;
+        noStroke();
+        colorMode(HSB);
+        translate(width/2, height/2);
+        rotateX(sin(millis() * 0.0003));
+        rotateY(sin(millis() * 0.0004));
+        rotateZ(sin(millis() * 0.0005));
+        scale(abs(sin(millis() * 0.0001)) + 0.8);
+        for (int i = 0; i < numCircles; i++) \{
+            fill( (i * abs(t) % 255), 255, 230);
+            pushMatrix();
+            rotate(radians((t + 90) * i));
+            translate(sqrt(c*i), sqrt(c*i), sin(t * 0.1 * i) * 20);
+            sphere(8);
+            popMatrix();
+        \}
+    \}
+"
+  }
+  ~ ./circles2d!out ./output-1!in
+}

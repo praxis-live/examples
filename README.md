@@ -8,7 +8,7 @@ NB. Closing a window will not remove the project components from the Praxis LIVE
 
 With all of these projects, you can open the .pxr files into the graphical editor and play around with them as they run.  Highlight or double-click a component to change its properties.  Drag components from the palette to add them to the graph, drag to connect ports together, or right-click and select `delete` to remove any highlighted components or connections.  Hover over the top tab of a component to find out its type (as shown in the palette), or connections to find out where they go.  Ctrl-mousewheel to zoom in and out, or navigate using the satellite view at the bottom right.
 
-Many components you can access and alter their code on-the-fly. Right-click on the top tab of the component and click `Edit code`.
+Most components you can access and alter their code on-the-fly. Right-click on the top tab of the component and click `Edit code`.
 
 ## Examples
 
@@ -35,29 +35,51 @@ Open audio.pxr to play with the audio graph, or gui.pxr to edit the control pane
 
 #### video input
 
-**Requires webcam**
+**Requires webcam and GStreamer installed**
 
 Simple webcam input with a couple of animated "negative" bars.
 
 #### video player
 
+**Requires GStreamer installed**
+
 Video playback on to a number of 3D transformed surfaces.
 
 **No video file included!** Select one of your own using the GUI.
 
+#### mouse drawing
+
+Simple example showing how to access the mouse and keyboard from inside P2D and P3D components (requires v3.3+). Drag the mouse to draw, move the mouse to rotate, press `C` to clear the screen.
+
+#### geometry
+
+Simple example of transforming data (in this case geometry) - requires v3.3+
+
 ### Video
 
-#### Kaleidoscope
+#### kaleidoscope
 
-**Requires webcam**
+**Requires webcam and GStreamer installed**
 
 Simple GLSL video filter with animated shader values.
 
-#### Smoky 3D
+#### smoky 3d
 
 "Smoky" shader effect textured on to a 3D shape using `video:gl:p3d` to access the Processing renderer.
 
 Shape ported from http://processing.org/examples/texturecylinder.html
+
+#### rocket mandala
+
+Loading and animating .OBJ files.
+
+#### circles
+
+Simple geometric animation ported from a Pharo Smalltalk example by Serge Stinckwich (https://youtu.be/IphXSTIfaY0). Good example for starting to experiment with code changes. Also includes a 3D variation.
+
+#### cube spheres
+
+Two shaders from GLSL Sandbox (http://glslsandbox.com/) composited with some simple geometry (thanks Max D!)
 
 ### Audio
 
@@ -73,9 +95,15 @@ Showing new features in v3 for working with binary data. A custom FFT component 
 
 #### blob theremin
 
-**Requires webcam**
+**Requires webcam and GStreamer installed**
 
 A simple blob tracking example controlling a sine wave. Give the camera 10s to adjust to the background before you start moving!
+
+#### live coder
+
+An example / base project for live-coding music with Praxis LIVE. `Edit code` on the live-coder component and experiment with uncommenting lines (`CTRL-/`) and saving (`CTRL-S`).
+
+Uses some samples from the excellent FoxDot live-coding project (http://foxdot.org/). You can change the samples to suit, and extend the project however you want. Note the various methods based on `Trigger` and Linkables to help build up sequences, and the use of `transmit()` to change synth parameters.
 
 
 ### TinkerForge
