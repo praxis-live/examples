@@ -1,0 +1,66 @@
+@ /video root:video {
+  #%pxr.format 2
+  #%graph.comment Drag the mouse to draw\nMove the mouse to transform\nPress C to clear
+  #%graph.colors Orange
+  .renderer OpenGL
+  .fps 60
+  @ ./output-1 video:output {
+    #%graph.x 414
+    #%graph.y 126
+    .always-on-top true
+    .show-cursor true
+  }
+  @ ./drawing video:gl:p2d {
+    #%graph.x 54
+    #%graph.y 126
+    .code "
+
+    @In(1) PImage in;
+
+    @Override
+    public void draw() \{
+        image(in,0,0);
+        if (keyPressed && key == 'c') \{
+            background(0);
+        \}
+        if (mousePressed) \{
+            strokeWeight(4);
+            stroke(255);
+            line(pmouseX,pmouseY,mouseX,mouseY);
+        \}
+    \}
+"
+  }
+  @ ./transform video:gl:p3d {
+    #%graph.x 228
+    #%graph.y 126
+    .code "
+
+    @In(1)
+    PImage in;
+
+    @Override
+    public void draw() \{
+        hint(DISABLE_DEPTH_TEST);
+        translate(width / 2, height / 2);
+        if (!mousePressed) \{
+            rotateY(map(mouseX, 0, width, -PI, PI));
+            rotateX(-map(mouseY, 0, height, -PI, PI));
+            blendMode(ADD);
+            translate(0, 0, -400);
+            for (int i = 0; i < 20; i++) \{
+                translate(0, 0, 20);
+                tint(i * 23 % 255, i * 49 % 255, 255 - (i * 37 % 255));
+                image(in, -width / 2, -height / 2);
+            \}
+        \} else \{
+            tint(255);
+            image(in,-width/2,-height/2);
+        \}
+    \}
+"
+  }
+  ~ ./drawing!out ./drawing!in
+  ~ ./drawing!out ./transform!in
+  ~ ./transform!out ./output-1!in
+}

@@ -1,0 +1,860 @@
+@ /audio root:audio {
+  #%pxr.format 2
+  #%graph.colors Purple
+  #%graph.comment Basic example setup for live coding music.\nUse it as a base!\nSome samples borrowed from the excellent FoxDot (foxdot.org),\nalthough it's easy to change them if you want to.\n
+  @ ./output-1 audio:output {
+    #%graph.x 1202
+    #%graph.y 284
+  }
+  @ ./clock-1 audio:clock {
+    #%graph.x 51
+    #%graph.y 164
+  }
+  @ ./live-coder audio:custom {
+    #%graph.x 215
+    #%graph.y 180
+    #%graph.comment Edit the code of this component,\nuncommenting the example lines and saving\nto see how they sound.
+    .code "import java.util.function.IntFunction;
+import java.util.stream.Stream;
+
+
+    @T(1) Trigger clock;
+    
+    @Out(1) Output bd1; @Out(2) Output bd2; @Out(3) Output bd3;
+    @Out(4) Output sn1; @Out(5) Output sn2; @Out(6) Output sn3;
+    @Out(7) Output hh1; @Out(8) Output hh2; @Out(9) Output hh3;
+    @Out(10) Output fx1; @Out(11) Output fx2; @Out(12) Output fx3;
+    
+    @Out(13) Output syn1; @Out(14) Output syn2;
+    
+    
+    @Override
+    public void setup() \{
+//        NOTE OFFS
+//        syn1.send(\"x\");
+//        syn2.send(\"x\");
+        
+        transmit(\"syn1\", \"resonance\", 15);
+        transmit(\"syn1\", \"osc-2-level\", 0.8);
+        transmit(\"syn1\", \"osc-2-transpose\", 12);
+        transmit(\"syn1\", \"waveform-2\", \"Saw\");
+//        transmit(\"syn1\", \"waveform-2\", \"Square\");
+        transmit(\"syn1\", \"decay\", 0.5);
+        
+        // DRUMS / FX
+        
+//        play(bd1, on(0,8));
+//        play(sn2, on(4,12));
+//        play(sn2, sometimes(0.25, on(5,6,7,13,14,15)));
+//        play(hh1, sometimes(0.9));
+//        play(hh2, sometimes(0.1));
+//        play(fx3, on(32));
+//        play(fx2, \"x - - x - - - - -\", cycle(32));
+        
+        // SYN 1
+        
+//        play(syn1, \"a1\", every(16));
+//        play(syn1, \"a1 x g1\");
+//        play(syn1, seq(16, \"a1 a2\", \"g1 g2 x\", \"d2 d3\", \"e2 e3 x\"), on(cycle(5,16), 0,2,3,4));
+//        play(syn1, seq(16, 64, \"a2 x g2\", \"x d2 e2\", \"g2 c#3 d3 f#4\"), cycle(8,13));
+//        play(syn1, seq(48,64,\"a2 x g2 - a2 d4 e4 x g4 a3\", \"e3 e3 e3 d3 e2 e2\"), cycle(11,32));
+//        play(syn1, seq(24,32, \"a1 x g1\", \"e4 e4 d4 a3 e2 x x\"), cycle(16));
+//        every(1).link(i -> transmit(\"syn1\", \"cutoff\", randomOf(440,880,1660)));
+//        every(1).link(i -> transmit(\"syn1\", \"decay\", randomOf(0.2,0.4,0.6)));
+//        every(4).link(i -> transmit(\"syn1\", \"osc-2-transpose\", randomOf(7,12,19,-12)));
+
+        // SYN 2
+
+//        play(syn2, seq(12,64,\"a4 x\", \"g4 x g4 x d4\"), cycle(7,16));
+//        play(syn2, seq(16, \"a3 c#4 e4\", \"g3 b3 d4\", \"d4 f#4 a4\", \"e4 g4 b4 d4\"), sometimes(0.9));
+//        play(syn2, seq(9, 32, \"a4 x g4\", \"a4 b4 c5 d5 e5 g5 a4\", \"-\"), cycle(7));
+//        every(1).link(i -> transmit(\"syn2\", \"mod-ratio\", randomOf(3,6)));
+//        every(1).link(i -> transmit(\"syn2\", \"mod-level\", randomOf(0.2,0.4)));
+
+
+        
+    \}
+
+    
+    void play(Output out, Linkable.Int clock) \{
+        play(out, \"x\", clock);
+    \}
+    
+    void play(Output out, String sequence) \{
+        play(out, sequence, clock.on());
+    \}
+    
+    void play(Output out, String sequence, Linkable.Int clock) \{
+        play(out, array(sequence), clock);
+    \}
+    
+    void play(Output out, PArray sequence, Linkable.Int clock) \{
+        clock.link(i -> filterSend(out, sequence.get(i)));
+    \}
+    
+    void play(Output out, IntFunction<Value> source) \{
+        play(out, source, clock.on());
+    \}
+    
+    void play(Output out, IntFunction<Value> source, Linkable.Int clock) \{
+        clock.link(i -> filterSend(out, source.apply(i)));
+    \}
+    
+    Linkable.Int every(int count) \{
+        int mod = count < 1 ? 1 : count > 64 ? 64 : count;
+        return clock.on().filter(i -> i % mod == 0).map(i -> i / mod);
+    \}
+    
+    Linkable.Int cycle(int count) \{
+        int mod = count < 16 ? 16 : count < 32 ? 32 : 64;
+        return cycle(count, mod, clock.on());
+    \}
+    
+    Linkable.Int cycle(int count, int over) \{
+        return cycle(count, over, clock.on());
+    \}
+    
+    Linkable.Int cycle(int count, int over, Linkable.Int source) \{
+        int mod = count < 1 ? 1 : count > over ? over : count;
+        int modOver = over < 1 ? 1 : over;
+        return source.map(i -> i % modOver % mod);
+    \}
+    
+    Linkable.Int on(int ... indices) \{
+        int max = max(indices);
+        int mod = max < 16 ? 16 : max < 32 ? 32 : 64;
+        return on(cycle(mod), indices);
+    \}
+    
+    Linkable.Int on(Linkable.Int source, int ... indices) \{
+        int\[\] ix = indices.length == 0 ? new int\[\]\{0\} : indices;
+        return source.map(i -> indexOf(i, ix)).filter(i -> i >= 0);
+    \}
+    
+    Linkable.Int sometimes(double amt) \{
+        return sometimes(amt, clock.on());
+    \}
+    
+    Linkable.Int sometimes(double amt, Linkable.Int source) \{
+        return source.filter(i -> random(1) < amt);
+    \}
+    
+    IntFunction<Value> seq(int count, String ... sequences) \{
+        int mod = count < 1 ? 1 : count;
+        PArray seqs = Stream.of(sequences)
+                .map(s -> array(s))
+                .collect(PArray.collector());
+        return i -> array(seqs.get(clock.index() / mod)).get(i);
+    \}
+    
+    IntFunction<Value> seq(int count, int over, String ... sequences) \{
+        int mod = count < 1 ? 1 : count > over ? over : count;
+        int modOver = over < 1 ? 1 : over;
+        PArray seqs = Stream.of(sequences)
+                .map(s -> array(s))
+                .collect(PArray.collector());
+        return i -> array(seqs.get(clock.index() % modOver / mod)).get(i);
+    \}
+    
+    
+    // utility methods
+    int indexOf(int needle, int\[\] indices) \{
+        for (int i = 0; i < indices.length; i++) \{
+            if (indices\[i\] == needle) \{
+                return i;
+            \}
+        \}
+        return -1;
+    \}
+    
+    void filterSend(Output out, Value value) \{
+        if (value.isEmpty() || value.toString().equals(\"-\")) \{
+            return;
+        \}
+        out.send(value);
+    \}
+
+"
+  }
+  @ ./mixer-6s audio:custom {
+    #%graph.x 701
+    #%graph.y 180
+    .code "
+
+    @In(1) AudioIn in1l;
+    @In(2) AudioIn in1r;
+    @In(3) AudioIn in2l;
+    @In(4) AudioIn in2r;
+    @In(5) AudioIn in3l;
+    @In(6) AudioIn in3r;
+    @In(7) AudioIn in4l;
+    @In(8) AudioIn in4r;
+    @In(9) AudioIn in5l;
+    @In(10) AudioIn in5r;
+    @In(11) AudioIn in6l;
+    @In(12) AudioIn in6r;
+    
+    @Out(1) AudioOut out1;
+    @Out(2) AudioOut out2;
+    
+    @P(1) @Type.Number(min=0, max=2, skew=4) double level1;
+    @P(2) @Type.Number(min=0, max=2, skew=4) double level2;
+    @P(3) @Type.Number(min=0, max=2, skew=4) double level3;
+    @P(4) @Type.Number(min=0, max=2, skew=4) double level4;
+    @P(5) @Type.Number(min=0, max=2, skew=4) double level5;
+    @P(6) @Type.Number(min=0, max=2, skew=4) double level6;
+    
+    @P(7) boolean mute1;
+    @P(8) boolean mute2;
+    @P(9) boolean mute3;
+    @P(10) boolean mute4;
+    @P(11) boolean mute5;
+    @P(12) boolean mute6;
+    
+    @UGen Gain g1l,g1r,g2l,g2r,g3l,g3r,g4l,g4r,g5l,g5r,g6l,g6r;
+    
+    @Override
+    public void setup() \{
+        link(
+            add(
+                link(in1l, g1l),
+                link(in2l, g2l),
+                link(in3l, g3l),
+                link(in4l, g4l),
+                link(in5l, g5l),
+                link(in6l, g6l)
+            ),
+            out1
+        );
+        link(
+            add(
+                link(in1r, g1r),
+                link(in2r, g2r),
+                link(in3r, g3r),
+                link(in4r, g4r),
+                link(in5r, g5r),
+                link(in6r, g6r)
+            ),
+            out2
+        );
+    \}
+
+    @Override
+    public void update() \{
+        g1l.level(mute1 ? 0 : level1);
+        g1r.level(mute1 ? 0 : level1);
+        g2l.level(mute2 ? 0 : level2);
+        g2r.level(mute2 ? 0 : level2);
+        g3l.level(mute3 ? 0 : level3);
+        g3r.level(mute3 ? 0 : level3);
+        g4l.level(mute4 ? 0 : level4);
+        g4r.level(mute4 ? 0 : level4);
+        g5l.level(mute5 ? 0 : level5);
+        g5r.level(mute5 ? 0 : level5);
+        g6l.level(mute6 ? 0 : level6);
+        g6r.level(mute6 ? 0 : level6);
+    \}
+"
+    .level-1 0.8
+    .level-2 0.8
+    .level-3 0.15
+    .level-4 0.08
+    .level-6 0.5
+  }
+  @ ./drums audio:custom {
+    #%graph.x 540
+    #%graph.y 180
+    .code "
+
+    @Out(1)
+    AudioOut out;
+    
+    @P(1) @OnChange(\"updateTables\") @Port(false)
+    Table sample1;
+    @P(2) @OnChange(\"updateTables\") @Port(false)
+    Table sample2;
+    @P(3) @OnChange(\"updateTables\") @Port(false)
+    Table sample3;
+    @P(4) @OnChange(\"updateTables\") @Port(false)
+    Table sample4;
+    @P(5) @OnChange(\"updateTables\") @Port(false)
+    Table sample5;
+    @P(6) @OnChange(\"updateTables\") @Port(false)
+    Table sample6;
+
+    @T(1) Trigger play1;
+    @T(2) Trigger play2;
+    @T(3) Trigger play3;
+    @T(4) Trigger play4;
+    @T(5) Trigger play5;
+    @T(6) Trigger play6;
+    
+    @P(7) @Type.Number(min=0, max=1, def=1)
+    Property level1;
+    @P(8) @Type.Number(min=0, max=1, def=1)
+    Property level2;
+    @P(9) @Type.Number(min=0, max=1, def=1)
+    Property level3;
+    @P(10) @Type.Number(min=0, max=1, def=1)
+    Property level4;
+    @P(11) @Type.Number(min=0, max=1, def=1)
+    Property level5;
+    @P(12) @Type.Number(min=0, max=1, def=1)
+    Property level6;
+    
+    @UGen
+    Player pl1, pl2, pl3, pl4, pl5, pl6;
+    @UGen
+    Gain g1, g2, g3, g4, g5, g6;
+
+    @Override
+    public void setup() \{
+        updateTables();
+        link(
+                add(
+                        link(pl1, g1),
+                        link(pl2, g2),
+                        link(pl3, g3),
+                        link(pl4, g4),
+                        link(pl5, g5),
+                        link(pl6, g6)
+                ),
+                out     
+        );
+        
+        play1.link(pl1::play);
+        play2.link(pl2::play);
+        play3.link(pl3::play);
+        play4.link(pl4::play);
+        play5.link(pl5::play);
+        play6.link(pl6::play);
+        
+        level1.values().map(l -> l*l).link(g1::level);
+        level2.values().map(l -> l*l).link(g2::level);
+        level3.values().map(l -> l*l).link(g3::level);
+        level4.values().map(l -> l*l).link(g4::level);
+        level5.values().map(l -> l*l).link(g5::level);
+        level6.values().map(l -> l*l).link(g6::level);
+    \}
+    
+    void updateTables() \{
+        pl1.table(sample1);
+        pl2.table(sample2);
+        pl3.table(sample3);
+        pl4.table(sample4);
+        pl5.table(sample5);
+        pl6.table(sample6);
+    \}
+    
+"
+    .sample-1 [file "resources/samples/Kick_Reg_1b.wav"]
+    .sample-2 [file "resources/samples/0_bass_drum.wav"]
+    .sample-3 [file "resources/samples/1_bass_low.wav"]
+    .sample-4 [file "resources/samples/Snare_Reg_1a.wav"]
+    .sample-5 [file "resources/samples/2_jungle_snare.wav"]
+    .sample-6 [file "resources/samples/glitch_1.wav"]
+    .level-2 0.8
+    .level-3 0.9
+    .level-5 0.8
+    .level-6 0.8
+  }
+  @ ./fx audio:custom {
+    #%graph.x 550
+    #%graph.y 430
+    .code "
+
+    @Out(1)
+    AudioOut out;
+    
+    @P(1) @OnChange(\"updateTables\") @Port(false)
+    Table sample1;
+    @P(2) @OnChange(\"updateTables\") @Port(false)
+    Table sample2;
+    @P(3) @OnChange(\"updateTables\") @Port(false)
+    Table sample3;
+    @P(4) @OnChange(\"updateTables\") @Port(false)
+    Table sample4;
+    @P(5) @OnChange(\"updateTables\") @Port(false)
+    Table sample5;
+    @P(6) @OnChange(\"updateTables\") @Port(false)
+    Table sample6;
+
+    @T(1) Trigger play1;
+    @T(2) Trigger play2;
+    @T(3) Trigger play3;
+    @T(4) Trigger play4;
+    @T(5) Trigger play5;
+    @T(6) Trigger play6;
+    
+    @P(7) @Type.Number(min=0, max=1, def=1)
+    Property level1;
+    @P(8) @Type.Number(min=0, max=1, def=1)
+    Property level2;
+    @P(9) @Type.Number(min=0, max=1, def=1)
+    Property level3;
+    @P(10) @Type.Number(min=0, max=1, def=1)
+    Property level4;
+    @P(11) @Type.Number(min=0, max=1, def=1)
+    Property level5;
+    @P(12) @Type.Number(min=0, max=1, def=1)
+    Property level6;
+    
+    @UGen
+    Player pl1, pl2, pl3, pl4, pl5, pl6;
+    @UGen
+    Gain g1, g2, g3, g4, g5, g6;
+
+    @Override
+    public void setup() \{
+        updateTables();
+        link(
+                add(
+                        link(pl1, g1),
+                        link(pl2, g2),
+                        link(pl3, g3),
+                        link(pl4, g4),
+                        link(pl5, g5),
+                        link(pl6, g6)
+                ),
+                out     
+        );
+        
+        play1.link(pl1::play);
+        play2.link(pl2::play);
+        play3.link(pl3::play);
+        play4.link(pl4::play);
+        play5.link(pl5::play);
+        play6.link(pl6::play);
+        
+        level1.values().map(l -> l*l).link(g1::level);
+        level2.values().map(l -> l*l).link(g2::level);
+        level3.values().map(l -> l*l).link(g3::level);
+        level4.values().map(l -> l*l).link(g4::level);
+        level5.values().map(l -> l*l).link(g5::level);
+        level6.values().map(l -> l*l).link(g6::level);
+    \}
+    
+    void updateTables() \{
+        pl1.table(sample1);
+        pl2.table(sample2);
+        pl3.table(sample3);
+        pl4.table(sample4);
+        pl5.table(sample5);
+        pl6.table(sample6);
+    \}
+    
+"
+    .sample-1 [file "resources/samples/HH_2_closed_a.wav"]
+    .sample-2 [file "resources/samples/HH_2_open.wav"]
+    .sample-3 [file "resources/samples/2_hihat_closed.wav"]
+    .sample-4 [file "resources/samples/noise_4.wav"]
+    .sample-5 [file "resources/samples/9_hihat_closed.wav"]
+    .sample-6 [file "resources/samples/bleep_2.wav"]
+    .level-3 0.6
+    .level-4 0.8
+    .level-5 0.9
+    .level-6 0.8
+  }
+  @ ./syn1 audio:custom {
+    #%graph.x 546
+    #%graph.y 679
+    .code "
+
+    final String SW = \"Saw\";
+    final String SQ = \"Square\";
+    
+    @Out(1) AudioOut out;
+    
+    @UGen Osc osc, osc2;
+    @UGen IIRFilter filter;
+    @UGen Gain amp;
+    
+    @P(1) @Type.String(allowed = \{SW, SQ\})
+    Property waveform1;
+    @P(2) @Type.String(allowed = \{SW, SQ\})
+    Property waveform2;
+    @P(3) @Type.Number(min=0, max=1, def=1)
+    double level;
+    @P(4) @Type.Number(min=0, max=1, def=0) 
+    Property osc2Level;
+    @P(5) @Type.Integer(min=-24, max=24, def=-12) 
+    int osc2Transpose;
+    @P(6) @Type.Number(min=110, max=8000, def=8000)
+    double cutoff;
+    @P(7) @Type.Number(min=0, max=20)
+    Property resonance;
+    @P(8) @Type.Number(min=0, max=2)
+    double attack;
+    @P(9) @Type.Number(min=0, max=2, def=2)
+    double decay;
+    @P(10) @Type.Number(min=0, max=1, def=1)
+    double sustain;
+    @P(11) @Type.Number(min=0, max=2, def=0)
+    double release;
+    @P(12) @Type.Number(min=0, max=1) 
+    double filterMod;
+    @P(13) @Type.Number(min=0, max=1, def=1) 
+    double ampMod;
+
+    @Inject Property freq1, freq2, env;
+    
+    @Override
+    public void setup() \{
+        link(add(osc, osc2), filter.type(IIRFilter.LP12), amp, out);
+        
+        waveform1.valuesAs(Value::toString).map(w -> Waveform.valueOf(w)).link(osc::waveform);
+        waveform2.valuesAs(Value::toString).map(w -> Waveform.valueOf(w)).link(osc2::waveform);
+        freq1.link(osc::frequency);
+        freq2.link(osc2::frequency);
+        osc2Level.values().map(d -> d*d).link(osc2::gain);
+        resonance.link(filter::resonance);
+        
+        env.values().map(e -> \{
+            double hz = d(freq1);
+            hz = (e * hz * 7) + hz;
+            return (filterMod * hz) + ((1 - filterMod) * cutoff);
+        \}).link(filter::frequency);
+        
+        env.values().map(e -> \{
+            e = e < 0.001 ? 0 : (ampMod * e * e) + (1 - ampMod);
+            return e * level * level;
+        \}).link(amp::level);
+        
+    \}
+    
+    @In(1) void note(String note) \{
+        if (note.isEmpty() || \"-\".equals(note)) \{
+            return;
+        \}
+        int midi = noteToMidi(note);
+        if (midi > 0) \{
+            noteOn(midi);
+        \} else \{
+            noteOff();
+        \}
+    \}
+    
+    void noteOn(int midi) \{
+        double f = midiToFrequency(midi);
+        freq1.set(f);
+        double f2 = midiToFrequency(midi + osc2Transpose);
+        freq2.set(f2);
+        env.to(1,sustain).in(attack,decay);
+    \}
+    
+    void noteOff() \{
+        env.to(0).in(release);
+    \}
+    
+"
+    .osc-2-level 0.8
+    .osc-2-transpose 12
+    .cutoff 1660
+    .resonance 15.0
+    .decay 0.5
+    .sustain 0.25
+    .filter-mod 0.5
+  }
+  @ ./reverb-1 audio:fx:reverb {
+    #%graph.x 1026
+    #%graph.y 316
+    .damp 0.25
+    .wet 0.2
+  }
+  @ ./syn2 audio:custom {
+    #%graph.x 546
+    #%graph.y 955
+    .code "
+
+    @Out(1) AudioOut out;
+    
+    @UGen Osc mod;
+    @UGen LFO lfo, car;
+    @UGen Gain amp;
+    
+    @P(1) @Type.Number(min=0, max=1, def=1)
+    double level;
+    @P(2) @Type.Number(min=0, max=2)
+    double attack;
+    @P(3) @Type.Number(min=0, max=2, def=0.5)
+    double decay;
+    @P(4) @Type.Number(min=0, max=1, def=0.5)
+    double sustain;
+    @P(5) @Type.Number(min=0, max=2, def=0)
+    double release;
+    @P(6) @Type.Number(min=0, max=16, def=3.0)
+    double modRatio;
+    @P(7) @Type.Number(min=0, max=1, def=0.5)
+    double modLevel;
+    @P(8) @Type.Number(min=0, max=2)
+    double modAttack;
+    @P(9) @Type.Number(min=0, max=2, def=0.5)
+    double modDecay;
+    @P(10) @Type.Number(min=0, max=1, def=0.5)
+    double modSustain;
+    @P(11) @Type.Number(min=0, max=16, def=1)
+    Property lfoFrequency;
+    @P(12) @Type.Number(min=0, max=1, def=0.5)
+    Property lfoLevel;
+
+    @Inject Property frequency, modEnv, ampEnv;
+    
+    @Override
+    public void setup() \{
+        car.waveform(SAW);
+        frequency.link(car::frequency);
+        ampEnv.link(d -> amp.level( (d * d) * level) );
+        lfoFrequency.link(lfo::frequency);
+        lfoLevel.link(lfo::gain);
+        link(car, modFn(add(mod, lfo), (m,c) -> sin( (m + c) * TWO_PI )), amp, out);
+    \}
+
+    @Override
+    public void update() \{
+        mod.frequency(modRatio * d(frequency)).gain(d(modEnv) * modLevel);
+    \} 
+    
+    @In(1) void note(String note) \{
+        if (note.isEmpty() || \"-\".equals(note)) \{
+            return;
+        \}
+        int midi = noteToMidi(note);
+        if (midi > 0) \{
+            noteOn(midi);
+        \} else \{
+            noteOff();
+        \}
+    \}
+    
+    void noteOn(int midi) \{
+        frequency.set(midiToFrequency(midi));
+        modEnv.to(1, modSustain).in(modAttack, modDecay);
+        ampEnv.to(1, sustain).in(attack, decay);
+    \}
+    
+    void noteOff() \{
+        ampEnv.to(0).in(release);
+    \}
+      
+"
+    .mod-level 0.2
+  }
+  @ ./fft audio:custom {
+    #%graph.x 908
+    #%graph.y 194
+    .code "import org.jaudiolibs.pipes.Buffer;
+import org.jaudiolibs.pipes.impl.SingleInOut;
+import java.io.*;
+
+
+    @In(1)
+    AudioIn in;
+    @Out(1)
+    AudioOut out;
+    @AuxOut(1)
+    Output powerData;
+    
+    
+    float\[\] fftReal;
+    float\[\] fftImag;
+    float\[\] power;
+    float\[\] dataCopy;
+
+    int writeIdx;
+    boolean send;
+
+    @Override
+    public void setup() \{
+        dataCopy = new float\[blockSize * 16\]; // 1024
+        power = new float\[dataCopy.length / 2\];
+        link(in, new FFT(), out);
+    \}
+
+    @Override
+    public void update() \{
+        if (send) \{
+            send = false;
+            try \{
+                powerData.send(PBytes.serialize(power));
+            \} catch (Exception ex) \{
+                log(ERROR, ex);
+            \}
+        \}
+    \}
+
+    class FFT extends SingleInOut \{
+
+        @Override
+        protected void process(Buffer buffer, boolean bln) \{
+            arrayCopy(buffer.getData(), 0, dataCopy, writeIdx, blockSize);
+            writeIdx += blockSize;
+            if (writeIdx >= dataCopy.length) \{
+                fft(dataCopy, dataCopy.length, true);
+                fftReal = calculateReal(dataCopy, dataCopy.length);
+                fftImag = calculateImaginary(dataCopy, dataCopy.length);
+                for (int i = 0; i < power.length; i++) \{
+                    power\[i\] = (fftReal\[i\] * fftReal\[i\] + fftImag\[i\] * fftImag\[i\]);
+                \}
+                send = true;
+                writeIdx = 0;
+            \}
+        \}
+
+    \}
+
+    protected static void fft(float\[\] data, int n, boolean isign) \{
+        float c1 = 0.5f;
+        float c2, h1r, h1i, h2r, h2i;
+        double wr, wi, wpr, wpi, wtemp;
+        double theta = 3.141592653589793 / (n >> 1);
+        if (isign) \{
+            c2 = -.5f;
+            four1(data, n >> 1, true);
+        \} else \{
+            c2 = .5f;
+            theta = -theta;
+        \}
+        wtemp = Math.sin(.5 * theta);
+        wpr = -2. * wtemp * wtemp;
+        wpi = Math.sin(theta);
+        wr = 1. + wpr;
+        wi = wpi;
+        int np3 = n + 3;
+        for (int i = 2, imax = n >> 2, i1, i2, i3, i4; i <= imax; ++i) \{
+            i4 = 1 + (i3 = np3 - (i2 = 1 + (i1 = i + i - 1)));
+            --i4;
+            --i2;
+            --i3;
+            --i1;
+            h1i = c1 * (data\[i2\] - data\[i4\]);
+            h2r = -c2 * (data\[i2\] + data\[i4\]);
+            h1r = c1 * (data\[i1\] + data\[i3\]);
+            h2i = c2 * (data\[i1\] - data\[i3\]);
+            data\[i1\] = (float) (h1r + wr * h2r - wi * h2i);
+            data\[i2\] = (float) (h1i + wr * h2i + wi * h2r);
+            data\[i3\] = (float) (h1r - wr * h2r + wi * h2i);
+            data\[i4\] = (float) (-h1i + wr * h2i + wi * h2r);
+            wr = (wtemp = wr) * wpr - wi * wpi + wr;
+            wi = wi * wpr + wtemp * wpi + wi;
+        \}
+        if (isign) \{
+            float tmp = data\[0\];
+            data\[0\] += data\[1\];
+            data\[1\] = tmp - data\[1\];
+        \} else \{
+            float tmp = data\[0\];
+            data\[0\] = c1 * (tmp + data\[1\]);
+            data\[1\] = c1 * (tmp - data\[1\]);
+            four1(data, n >> 1, false);
+        \}
+    \}
+
+    private static void four1(float data\[\], int nn, boolean isign) \{
+        int n, mmax, istep;
+        double wtemp, wr, wpr, wpi, wi, theta;
+        float tempr, tempi;
+
+        n = nn << 1;
+        for (int i = 1, j = 1; i < n; i += 2) \{
+            if (j > i) \{
+                // SWAP(data\[j\], data\[i\]);
+                float swap = data\[j - 1\];
+                data\[j - 1\] = data\[i - 1\];
+                data\[i - 1\] = swap;
+                // SWAP(data\[j+1\], data\[i+1\]);
+                swap = data\[j\];
+                data\[j\] = data\[i\];
+                data\[i\] = swap;
+            \}
+            int m = n >> 1;
+            while (m >= 2 && j > m) \{
+                j -= m;
+                m >>= 1;
+            \}
+            j += m;
+        \}
+        mmax = 2;
+        while (n > mmax) \{
+            istep = mmax << 1;
+            theta = 6.28318530717959 / mmax;
+            if (!isign) \{
+                theta = -theta;
+            \}
+            wtemp = Math.sin(0.5 * theta);
+            wpr = -2.0 * wtemp * wtemp;
+            wpi = Math.sin(theta);
+            wr = 1.0;
+            wi = 0.0;
+            for (int m = 1; m < mmax; m += 2) \{
+                for (int i = m; i <= n; i += istep) \{
+                    int j = i + mmax;
+                    tempr = (float) (wr * data\[j - 1\] - wi * data\[j\]);
+                    tempi = (float) (wr * data\[j\] + wi * data\[j - 1\]);
+                    data\[j - 1\] = data\[i - 1\] - tempr;
+                    data\[j\] = data\[i\] - tempi;
+                    data\[i - 1\] += tempr;
+                    data\[i\] += tempi;
+                \}
+                wr = (wtemp = wr) * wpr - wi * wpi + wr;
+                wi = wi * wpr + wtemp * wpi + wi;
+            \}
+            mmax = istep;
+        \}
+    \}
+
+    protected static float\[\] calculateReal(float\[\] spectrum, int length) \{
+        float\[\] real = new float\[length\];
+        real\[0\] = spectrum\[0\];
+        real\[real.length / 2\] = spectrum\[1\];
+        for (int i = 1, j = real.length - 1; i < j; ++i, --j) \{
+            real\[j\] = real\[i\] = spectrum\[2 * i\];
+        \}
+        return real;
+    \}
+
+    protected static float\[\] calculateImaginary(float\[\] spectrum, int length) \{
+        float\[\] imag = new float\[length\];
+        for (int i = 1, j = imag.length - 1; i < j; ++i, --j) \{
+            imag\[i\] = -(imag\[j\] = spectrum\[2 * i + 1\]);
+        \}
+        return imag;
+    \}
+
+
+"
+  }
+  @ ./send-1 core:routing:send {
+    #%graph.x 1208
+    #%graph.y 204
+    .address /video/p3d-1.fft
+  }
+  ~ ./drums!out ./mixer-6s!in-1l
+  ~ ./drums!out ./mixer-6s!in-1r
+  ~ ./fx!out ./mixer-6s!in-2l
+  ~ ./fx!out ./mixer-6s!in-2r
+  ~ ./mixer-6s!out-2 ./reverb-1!in-2
+  ~ ./syn1!out ./mixer-6s!in-3l
+  ~ ./syn1!out ./mixer-6s!in-3r
+  ~ ./live-coder!bd-1 ./drums!play-1
+  ~ ./live-coder!bd-2 ./drums!play-2
+  ~ ./live-coder!bd-3 ./drums!play-3
+  ~ ./live-coder!sn-1 ./drums!play-4
+  ~ ./live-coder!sn-2 ./drums!play-5
+  ~ ./live-coder!sn-3 ./drums!play-6
+  ~ ./live-coder!hh-1 ./fx!play-1
+  ~ ./live-coder!hh-2 ./fx!play-2
+  ~ ./live-coder!hh-3 ./fx!play-3
+  ~ ./live-coder!fx-1 ./fx!play-4
+  ~ ./live-coder!fx-2 ./fx!play-5
+  ~ ./live-coder!fx-3 ./fx!play-6
+  ~ ./live-coder!syn-1 ./syn1!note
+  ~ ./clock-1!out ./live-coder!clock
+  ~ ./syn2!out ./mixer-6s!in-4l
+  ~ ./syn2!out ./mixer-6s!in-4r
+  ~ ./live-coder!syn-2 ./syn2!note
+  ~ ./reverb-1!out-1 ./output-1!in-1
+  ~ ./fft!power-data ./send-1!in
+  ~ ./reverb-1!out-2 ./output-1!in-2
+  ~ ./mixer-6s!out-1 ./fft!in
+  ~ ./fft!out ./reverb-1!in-1
+}
