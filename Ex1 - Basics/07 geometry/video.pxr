@@ -1,6 +1,6 @@
 @ /video root:video {
-  #%pxr.format 2
   #%graph.comment Example of new support for writing data (eg. geometry) transforming components.
+  #%praxis.version 4.0.0-rc1
   .renderer OpenGL
   .fps 60
   @ ./output-1 video:output {

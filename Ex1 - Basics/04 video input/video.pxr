@@ -1,7 +1,7 @@
 @ /video root:video {
-  #%pxr.format 2
   #%autostart true
   #%graph.comment Video Capture\n\nSimple video capture example, with animated\nnegative bars drawn on top of webcam image.\n\nRequires webcam (obviously!)
+  #%praxis.version 4.0.0-rc1
   @ ./output video:output {
     #%graph.x 615
     #%graph.y 351
@@ -12,7 +12,6 @@
     #%graph.x 230
     #%graph.y 302
     #%graph.comment A video:capture component.\nMake sure device is set!
-    .device 1
     .source-width 640
     .source-height 480
   }

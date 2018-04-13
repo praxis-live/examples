@@ -1,7 +1,7 @@
 @ /video root:video {
-  #%pxr.format 2
   #%graph.comment Drag the mouse to draw\nMove the mouse to transform\nPress C to clear
   #%graph.colors Orange
+  #%praxis.version 4.0.0-rc1
   .renderer OpenGL
   .fps 60
   @ ./output-1 video:output {
