@@ -1,14 +1,13 @@
 @ /video root:video {
-  #%pxr.format 2
+  #%praxis.version 4.0.0-rc1
   .fps 15.0
   @ ./output1 video:output {
     #%graph.x 1303
     #%graph.y 179
   }
   @ ./capture1 video:capture {
-    #%graph.x 395
-    #%graph.y 94
-    .device 1
+    #%graph.x 388
+    #%graph.y 72
     .source-width 640
     .source-height 480
   }
@@ -34,18 +33,18 @@
     .debug true
   }
   @ ./blur1 video:fx:blur {
-    #%graph.x 870
-    #%graph.y 108
+    #%graph.x 889
+    #%graph.y 103
     .radius 10
   }
   @ ./timer1 core:timing:timer {
-    #%graph.x 477
-    #%graph.y 498
+    #%graph.x 359
+    #%graph.y 590
     .period 5.0
   }
   @ ./mix-start core:variable {
-    #%graph.x 327
-    #%graph.y 254
+    #%graph.x 217
+    #%graph.y 252
     .value 1
   }
   @ ./mix-delay core:timing:delay {
@@ -54,8 +53,8 @@
     .time 10.0
   }
   @ ./mix core:variable {
-    #%graph.x 359
-    #%graph.y 384
+    #%graph.x 337
+    #%graph.y 435
     .value 0.05
   }
   @ ./send1 core:routing:send {
@@ -64,8 +63,8 @@
     .address /audio/blobX.value
   }
   @ ./send2 core:routing:send {
-    #%graph.x 1262
-    #%graph.y 341
+    #%graph.x 1281
+    #%graph.y 391
     .address /audio/blobWidth.value
   }
   ~ ./start-trigger1!out ./capture1!play

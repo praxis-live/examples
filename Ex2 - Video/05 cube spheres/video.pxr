@@ -1,14 +1,14 @@
 @ /video root:video {
-  #%pxr.format 2
   #%graph.comment Two shaders from GLSL sandbox\ncomposited with some simple geometry (thanks Max D!)
   #%graph.colors Red
+  #%praxis.version 4.0.0-rc1
   .renderer OpenGL
   .width 800
   .height 600
   .fps 60
   @ ./output-1 video:output {
-    #%graph.x 676
-    #%graph.y 250
+    #%graph.x 705
+    #%graph.y 258
   }
   @ ./gl-source1 video:gl:p2d {
     #%graph.x 214
@@ -37,7 +37,7 @@
     @P(0)
     @Type.String(mime = GLSL_FRAGMENT_MIME, template = DEF_FRAG)
     @OnChange(\"updateShader\")
-    @Port(false)
+    @Config.Port(false)
     String fragment;
 
     PShader shader;
@@ -122,7 +122,7 @@ void main( void )
   }
   @ ./cubesphere video:gl:p3d {
     #%graph.x 214
-    #%graph.y 320
+    #%graph.y 411
     .code "
 
     @Override
@@ -156,15 +156,14 @@ void main( void )
 "
   }
   @ ./composite-1 video:composite {
-    #%graph.x 438
-    #%graph.y 218
+    #%graph.x 483
+    #%graph.y 196
     .mode Difference
-    .mix 1.0
     .force-alpha true
   }
   @ ./noise-warp video:gl:p3d {
     #%graph.x 214
-    #%graph.y 196
+    #%graph.y 234
     .code "
 
     @P(1) @Type.Number(min = 0, max = 1, def = 0.1)
@@ -193,7 +192,7 @@ void main( void )
     @P(0)
     @Type.String(mime = GLSL_FRAGMENT_MIME, template = DEFAULT_FRAGMENT_SHADER)
     @OnChange(\"updateShader\")
-    @Port(false)
+    @Config.Port(false)
     String fragment;
 
     PShader shader;
@@ -372,7 +371,7 @@ uniform float frequency;
     @P(0)
     @Type.String(mime = GLSL_FRAGMENT_MIME, template = DEF_FRAG)
     @OnChange(\"updateShader\")
-    @Port(false)
+    @Config.Port(false)
     String fragment;
 
     PShader shader;

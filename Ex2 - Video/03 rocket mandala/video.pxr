@@ -1,6 +1,6 @@
 @ /video root:video {
-  #%pxr.format 2
   #%graph.comment Example loading and transforming an OBJ file,\nusing the rocket.obj file from Processing.
+  #%praxis.version 4.0.0-rc1
   .renderer OpenGL
   .width 1024
   .height 768
@@ -11,12 +11,12 @@
     .always-on-top true
   }
   @ ./p3d-1 video:gl:p3d {
-    #%graph.x 26
-    #%graph.y 187
+    #%graph.x 29
+    #%graph.y 238
     .code "
 
     @P(1)
-    @Port(false)
+    @Config.Port(false)
     PShape shape;
     
     @Inject Property rotation, pulse;
@@ -49,7 +49,6 @@
   @ ./composite-1 video:composite {
     #%graph.x 196
     #%graph.y 99
-    .mix 1.0
     .force-alpha true
   }
   @ ./nebula video:gl:p2d {
@@ -79,7 +78,7 @@
     @P(0)
     @Type.String(mime = GLSL_FRAGMENT_MIME, template = DEF_FRAG)
     @OnChange(\"updateShader\")
-    @Port(false)
+    @Config.Port(false)
     String fragment;
 
     PShader shader;

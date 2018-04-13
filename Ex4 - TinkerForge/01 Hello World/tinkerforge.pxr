@@ -1,4 +1,5 @@
 @ /tinkerforge root:tinkerforge {
+  #%praxis.version 4.0.0-rc1
   @ ./lcd20x4-1 tinkerforge:lcd20x4 {
     #%graph.x 327
     #%graph.y 34
