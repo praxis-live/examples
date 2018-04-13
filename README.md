@@ -12,11 +12,6 @@ Most components you can access and alter their code on-the-fly. Right-click on t
 
 ## Examples
 
-#### Hello World PL2
-
-Say hello to Praxis LIVE! Showcasing features that appeared in v2, including revised shader (GLSL) and Processing 3D support.
-
-
 ### Basics /
 
 #### hello world
@@ -125,16 +120,3 @@ Simple flashing LED example. Requires IO16 bricklet hooked up to an LED!
 #### tf custom code
 
 Using `core:custom` module to translate audio levels for the LCD display. Requires LCD20x4 bricklet.
-
-### Misc
-
-#### Magoria
-
-Simplified reworking of _Magoria_ - a generative portrait of the people of Oxfordshire.
-
-#### RAM
-
-Live loop sampler used in performances of _Radio Access Memory_ (predates Praxis LIVE). https://youtu.be/sMx6E6PoC4o
-
- 
-
