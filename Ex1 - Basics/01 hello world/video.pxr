@@ -1,7 +1,7 @@
 @ /video root:video {
-  #%pxr.format 2
   #%autostart true
   #%graph.comment Hello World\n\nA simple video example piping a noise source through\na semi-transparent image.\n\nUse the play button above to start and stop the pipeline.\nUse the properties button above to change frame size,\nframe rate or renderer (software or OpenGL).
+  #%praxis.version 4.0.0-rc1
   .width 400
   .height 300
   .fps 20.0

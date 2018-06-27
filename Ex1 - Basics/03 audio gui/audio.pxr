@@ -1,70 +1,146 @@
 @ /audio root:audio {
-  @ ./beat audio:sampleplayer {
-    #%graph.x 209
-    #%graph.y 14
+  #%praxis.version 4.0.0-rc1
+  @ ./output audio:output {
+    #%graph.x 1055
+    #%graph.y 78
+  }
+  @ ./start core:start-trigger {
+    #%graph.x 51
+    #%graph.y 57
+  }
+  @ ./beat audio:player {
+    #%graph.x 189
+    #%graph.y 57
     .sample [file "resources/audio/beat.wav"]
     .loop true
   }
-  @ ./fx1 audio:sampleplayer {
-    #%graph.x 23
-    #%graph.y 198
+  @ ./overdrive audio:fx:overdrive {
+    #%graph.x 544
+    #%graph.y 57
+  }
+  @ ./filter audio:fx:filter {
+    #%graph.x 372
+    #%graph.y 57
+    .type LP12
+  }
+  @ ./fx1 audio:player {
+    #%graph.x 340
+    #%graph.y 296
     .sample [file "resources/audio/stab1.wav"]
   }
-  @ ./fx2 audio:sampleplayer {
-    #%graph.x 158
-    #%graph.y 259
+  @ ./fx2 audio:player {
+    #%graph.x 458
+    #%graph.y 419
     .sample [file "resources/audio/stab2.wav"]
   }
-  @ ./fx3 audio:sampleplayer {
-    #%graph.x 283
-    #%graph.y 328
+  @ ./fx3 audio:player {
+    #%graph.x 584
+    #%graph.y 545
     .sample [file "resources/audio/drone1.wav"]
   }
-  @ ./fx4 audio:sampleplayer {
-    #%graph.x 414
-    #%graph.y 398
+  @ ./fx4 audio:player {
+    #%graph.x 711
+    #%graph.y 682
     .sample [file "resources/audio/drone2.wav"]
   }
-  @ ./fx-gain audio:gain {
-    #%graph.x 734
-    #%graph.y 218
-    .level 0.30000001192092896
+  @ ./mixer-6s audio:custom {
+    #%graph.x 859
+    #%graph.y 189
+    .code "
+
+    @In(1) AudioIn in1l;
+    @In(2) AudioIn in1r;
+    @In(3) AudioIn in2l;
+    @In(4) AudioIn in2r;
+    @In(5) AudioIn in3l;
+    @In(6) AudioIn in3r;
+    @In(7) AudioIn in4l;
+    @In(8) AudioIn in4r;
+    @In(9) AudioIn in5l;
+    @In(10) AudioIn in5r;
+    @In(11) AudioIn in6l;
+    @In(12) AudioIn in6r;
+    
+    @Out(1) AudioOut out1;
+    @Out(2) AudioOut out2;
+    
+    @P(1) @Type.Number(min=0, max=2, skew=4) double level1;
+    @P(2) @Type.Number(min=0, max=2, skew=4) double level2;
+    @P(3) @Type.Number(min=0, max=2, skew=4) double level3;
+    @P(4) @Type.Number(min=0, max=2, skew=4) double level4;
+    @P(5) @Type.Number(min=0, max=2, skew=4) double level5;
+    @P(6) @Type.Number(min=0, max=2, skew=4) double level6;
+    
+    @P(7) boolean mute1;
+    @P(8) boolean mute2;
+    @P(9) boolean mute3;
+    @P(10) boolean mute4;
+    @P(11) boolean mute5;
+    @P(12) boolean mute6;
+    
+    @UGen Gain g1l,g1r,g2l,g2r,g3l,g3r,g4l,g4r,g5l,g5r,g6l,g6r;
+    
+    @Override
+    public void setup() \{
+        link(
+            add(
+                link(in1l, g1l),
+                link(in2l, g2l),
+                link(in3l, g3l),
+                link(in4l, g4l),
+                link(in5l, g5l),
+                link(in6l, g6l)
+            ),
+            out1
+        );
+        link(
+            add(
+                link(in1r, g1r),
+                link(in2r, g2r),
+                link(in3r, g3r),
+                link(in4r, g4r),
+                link(in5r, g5r),
+                link(in6r, g6r)
+            ),
+            out2
+        );
+    \}
+
+    @Override
+    public void update() \{
+        g1l.level(mute1 ? 0 : level1);
+        g1r.level(mute1 ? 0 : level1);
+        g2l.level(mute2 ? 0 : level2);
+        g2r.level(mute2 ? 0 : level2);
+        g3l.level(mute3 ? 0 : level3);
+        g3r.level(mute3 ? 0 : level3);
+        g4l.level(mute4 ? 0 : level4);
+        g4r.level(mute4 ? 0 : level4);
+        g5l.level(mute5 ? 0 : level5);
+        g5r.level(mute5 ? 0 : level5);
+        g6l.level(mute6 ? 0 : level6);
+        g6r.level(mute6 ? 0 : level6);
+    \}
+"
+    .level-1 0.7
+    .level-2 0.7
+    .level-3 0.7
   }
-  @ ./beat-gain audio:gain {
-    #%graph.x 794
-    #%graph.y 52
-    .level 0.5
-  }
-  @ ./overdrive audio:distortion:overdrive {
-    #%graph.x 575
-    #%graph.y 32
-    .mix 1.0
-  }
-  @ ./filter audio:filter:iir {
-    #%graph.x 395
-    #%graph.y 34
-    .type LP12
-    .frequency 20000.0
-    .mix 1.0
-  }
-  @ ./output audio:output {
-    #%graph.x 1055
-    #%graph.y 169
-  }
-  @ ./start core:start-trigger {
-    #%graph.x 22
-    #%graph.y 41
-  }
-  ~ ./beat!out ./filter!in
-  ~ ./filter!out ./overdrive!in
-  ~ ./overdrive!out ./beat-gain!in
-  ~ ./beat-gain!out ./output!in-1
-  ~ ./beat-gain!out ./output!in-2
-  ~ ./fx1!out ./fx-gain!in
-  ~ ./fx2!out ./fx-gain!in
-  ~ ./fx3!out ./fx-gain!in
-  ~ ./fx4!out ./fx-gain!in
-  ~ ./fx-gain!out ./output!in-1
-  ~ ./fx-gain!out ./output!in-2
   ~ ./start!out ./beat!play
+  ~ ./fx1!out-1 ./mixer-6s!in-2l
+  ~ ./fx1!out-2 ./mixer-6s!in-2r
+  ~ ./fx2!out-1 ./mixer-6s!in-2l
+  ~ ./fx2!out-2 ./mixer-6s!in-2r
+  ~ ./fx3!out-1 ./mixer-6s!in-3l
+  ~ ./fx3!out-2 ./mixer-6s!in-3r
+  ~ ./fx4!out-1 ./mixer-6s!in-3l
+  ~ ./fx4!out-2 ./mixer-6s!in-3r
+  ~ ./mixer-6s!out-1 ./output!in-1
+  ~ ./mixer-6s!out-2 ./output!in-2
+  ~ ./beat!out-1 ./filter!in-1
+  ~ ./beat!out-2 ./filter!in-2
+  ~ ./filter!out-1 ./overdrive!in-1
+  ~ ./filter!out-2 ./overdrive!in-2
+  ~ ./overdrive!out-1 ./mixer-6s!in-1l
+  ~ ./overdrive!out-2 ./mixer-6s!in-1r
 }

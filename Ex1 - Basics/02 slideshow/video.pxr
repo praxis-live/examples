@@ -1,7 +1,7 @@
 @ /video root:video {
-  #%pxr.format 2
   #%graph.comment Slideshow\n\nA simple slideshow example that fades\nbetween images in a folder.
   #%graph.colors Green
+  #%praxis.version 4.0.0-rc1
   .width 400
   .height 300
   .fps 20.0

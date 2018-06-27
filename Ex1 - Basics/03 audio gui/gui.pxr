@@ -1,4 +1,5 @@
 @ /gui root:gui {
+  #%praxis.version 4.0.0-rc1
   @ ./button1 gui:button {
     .label "Stab 1"
     .binding /audio/fx1.play
@@ -18,18 +19,6 @@
     .label "Drone 2"
     .binding /audio/fx4.play
     .layout "cell 3 0, width 120, height 100"
-  }
-  @ ./h-slider1 gui:h-slider {
-    .label "FX Gain"
-    .binding /audio/fx-gain.level
-    .maximum 0.7
-    .layout "cell 0 1 4 1"
-  }
-  @ ./h-slider2 gui:h-slider {
-    .label "Beat Gain"
-    .binding /audio/beat-gain.level
-    .maximum 0.7
-    .layout "cell 0 2 4 1"
   }
   @ ./h-slider3 gui:h-slider {
     .label Distortion

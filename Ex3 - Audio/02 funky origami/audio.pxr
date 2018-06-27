@@ -1,14 +1,14 @@
 @ /audio root:audio {
-  #%pxr.format 2
   #%graph.colors Purple
   #%graph.comment FUNKY ORIGAMI - audio patch\n\nExample demonstrating new coding features in v3 including\nsupport for lists and binary data for sending FFT data.
+  #%praxis.version 4.0.0-rc1
   @ ./output-1 audio:output {
     #%graph.x 1519
     #%graph.y 338
   }
   @ ./duo-osc audio:custom {
-    #%graph.x 779
-    #%graph.y 310
+    #%graph.x 786
+    #%graph.y 391
     .code "
 
     final String SW = \"Saw\";
@@ -20,13 +20,13 @@
     @UGen IIRFilter filter;
     @UGen Gain amp;
     
-    @P(1) @Type.String(allowed = \{SW, SQ\}) @OnChange(\"updateWaves\") @Port(false)
+    @P(1) @Type.String(allowed = \{SW, SQ\}) @OnChange(\"updateWaves\") @Config.Port(false)
     String waveform1;
-    @P(2) @Type.String(allowed = \{SW, SQ\}) @OnChange(\"updateWaves\") @Port(false)
+    @P(2) @Type.String(allowed = \{SW, SQ\}) @OnChange(\"updateWaves\") @Config.Port(false)
     String waveform2;
     @P(3) @Type.Number(min=0, max=1, def=1)
     double level;
-    @P(4) @Type.Number(min=0, max=1, def=0) @Port(false)
+    @P(4) @Type.Number(min=0, max=1, def=0) @Config.Port(false)
     double osc2Level;
     @P(5) @Type.Integer(min=-24, max=24, def=-12) 
     int osc2Transpose;
@@ -42,9 +42,9 @@
     double sustain;
     @P(11) @Type.Number(min=0, max=2, def=0)
     double release;
-    @P(12) @Type.Number(min=0, max=1) @Port(false)
+    @P(12) @Type.Number(min=0, max=1) @Config.Port(false)
     double filterMod;
-    @P(13) @Type.Number(min=0, max=1, def=1) @Port(false)
+    @P(13) @Type.Number(min=0, max=1, def=1) @Config.Port(false)
     double ampMod;
 
     @Inject Property freq1, freq2, env;
@@ -116,7 +116,7 @@
   }
   @ ./custom-1 core:custom {
     #%graph.x 335
-    #%graph.y 218
+    #%graph.y 227
     #%graph.comment Custom component sends notes and\ncontrol data to synths.\n\nRight-click and edit code to see /\nchange what it's doing.
     .code "import java.util.stream.*;
 
@@ -200,25 +200,25 @@
     double level;
     @P(2) @Type.Number(min=0, max=2)
     double attack;
-    @P(3) @Type.Number(min=0, max=2, def=2) @Port(false)
+    @P(3) @Type.Number(min=0, max=2, def=2) @Config.Port(false)
     double decay;
-    @P(4) @Type.Number(min=0, max=1, def=1) @Port(false)
+    @P(4) @Type.Number(min=0, max=1, def=1) @Config.Port(false)
     double sustain;
-    @P(5) @Type.Number(min=0, max=2, def=0) @Port(false)
+    @P(5) @Type.Number(min=0, max=2, def=0) @Config.Port(false)
     double release;
     @P(6) @Type.Number(min=0, max=16, def=1)
     double modRatio;
-    @P(7) @Type.Number(min=0, max=1) @Port(false)
+    @P(7) @Type.Number(min=0, max=1) @Config.Port(false)
     double modLevel;
-    @P(8) @Type.Number(min=0, max=2) @Port(false)
+    @P(8) @Type.Number(min=0, max=2) @Config.Port(false)
     double modAttack;
-    @P(9) @Type.Number(min=0, max=2, def=2) @Port(false)
+    @P(9) @Type.Number(min=0, max=2, def=2) @Config.Port(false)
     double modDecay;
-    @P(10) @Type.Number(min=0, max=1, def=1) @Port(false)
+    @P(10) @Type.Number(min=0, max=1, def=1) @Config.Port(false)
     double modSustain;
-    @P(11) @Type.Number(min=0, max=16, def=1) @Port(false)
+    @P(11) @Type.Number(min=0, max=16, def=1) @Config.Port(false)
     Property lfoFrequency;
-    @P(12) @Type.Number(min=0, max=1, def=0) @Port(false)
+    @P(12) @Type.Number(min=0, max=1, def=0) @Config.Port(false)
     Property lfoLevel;
 
     @Inject Property frequency, modEnv, ampEnv;
@@ -272,8 +272,8 @@
     .lfo-level 0.6370967741935484
   }
   @ ./chorus-1 audio:fx:chorus {
-    #%graph.x 779
-    #%graph.y 162
+    #%graph.x 786
+    #%graph.y 163
     .depth 2.4
     .rate 0.4
     .feedback 0.4
@@ -287,8 +287,8 @@
     .wet 0.2
   }
   @ ./fft audio:custom {
-    #%graph.x 1172
-    #%graph.y 619
+    #%graph.x 1219
+    #%graph.y 633
     #%graph.comment Custom FFT component sends\nfrequency data to video patch.\n\nGPL code ported from Beads\nhttp://www.beadsproject.net\n(c) Holger Crysandt / Ollie Bown
     .code "import org.jaudiolibs.pipes.Buffer;
 import org.jaudiolibs.pipes.impl.SingleInOut;
@@ -579,30 +579,30 @@ import java.io.*;
     .mute-2 true
   }
   @ ./send-1 core:routing:send {
-    #%graph.x 1172
-    #%graph.y 708
+    #%graph.x 1313
+    #%graph.y 760
     .address /video/fft-vis.fft
   }
   @ ./mono-kit audio:custom {
-    #%graph.x 773
-    #%graph.y 569
+    #%graph.x 781
+    #%graph.y 696
     .code "
 
     @Out(1)
     AudioOut out;
     
-    @P(1) @OnChange(\"updateTables\") @Port(false)
-    Table sample1;
-    @P(2) @OnChange(\"updateTables\") @Port(false)
-    Table sample2;
-    @P(3) @OnChange(\"updateTables\") @Port(false)
-    Table sample3;
-    @P(4) @OnChange(\"updateTables\") @Port(false)
-    Table sample4;
-    @P(5) @OnChange(\"updateTables\") @Port(false)
-    Table sample5;
-    @P(6) @OnChange(\"updateTables\") @Port(false)
-    Table sample6;
+    @P(1) @OnChange(\"updateTables\") @Config.Port(false)
+    AudioTable sample1;
+    @P(2) @OnChange(\"updateTables\") @Config.Port(false)
+    AudioTable sample2;
+    @P(3) @OnChange(\"updateTables\") @Config.Port(false)
+    AudioTable sample3;
+    @P(4) @OnChange(\"updateTables\") @Config.Port(false)
+    AudioTable sample4;
+    @P(5) @OnChange(\"updateTables\") @Config.Port(false)
+    AudioTable sample5;
+    @P(6) @OnChange(\"updateTables\") @Config.Port(false)
+    AudioTable sample6;
 
     @P(7) @Type.Number(min=0, max=1, def=1) @OnChange(\"updateLevels\")
     double level1;

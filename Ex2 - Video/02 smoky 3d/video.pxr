@@ -1,11 +1,11 @@
 @ /video root:video {
-  #%pxr.format 2
+  #%praxis.version 4.0.0-rc1
   .renderer OpenGL
   .width 800
   .height 600
   @ ./cylinder video:gl:p3d {
-    #%graph.x 431
-    #%graph.y 259
+    #%graph.x 424
+    #%graph.y 122
     .code "
 
     @In(1)
@@ -61,17 +61,17 @@
     .y 0.4425453118126925
   }
   @ ./output video:output {
-    #%graph.x 667
-    #%graph.y 279
+    #%graph.x 660
+    #%graph.y 142
     .always-on-top true
   }
   @ ./animator core:custom {
-    #%graph.x 62
-    #%graph.y 291
+    #%graph.x 55
+    #%graph.y 154
     .code "
 
-    @P(1) @Port(false) Property x;
-    @P(2) @Port(false) Property y;
+    @P(1) @Config.Port(false) Property x;
+    @P(2) @Config.Port(false) Property y;
     
     @Out(1) Output x_pos;
     @Out(2) Output y_pos;
@@ -95,8 +95,8 @@ public void update() \{
     .y 0.4425453118126925
   }
   @ ./smoky video:gl:p3d {
-    #%graph.x 201
-    #%graph.y 204
+    #%graph.x 194
+    #%graph.y 67
     .code "
 
      @P(1) @ReadOnly Property time;
@@ -115,7 +115,7 @@ public void update() \{
     @P(0)
     @Type.String(mime = GLSL_FRAGMENT_MIME, template = DEFAULT_FRAGMENT_SHADER)
     @OnChange(\"updateShader\")
-    @Port(false)
+    @Config.Port(false)
     String fragment;
 
     PShader shader;

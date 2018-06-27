@@ -1,16 +1,17 @@
 @ /video root:video {
-  #%pxr.format 2
+  #%praxis.version 4.0.0-rc1
   .renderer OpenGL
   .width 800
   .height 600
   @ ./capture1 video:capture {
-    #%graph.x 220
-    #%graph.y 216
-    .device 1
+    #%graph.x 290
+    #%graph.y 38
     .source-width 800
     .source-height 600
   }
   @ ./start-trigger1 core:start-trigger {
+    #%graph.x 40
+    #%graph.y 38
   }
   @ ./output1 video:output {
     #%graph.x 787
@@ -18,8 +19,8 @@
     .always-on-top true
   }
   @ ./kaleidoscope video:gl:p3d {
-    #%graph.x 464
-    #%graph.y 246
+    #%graph.x 522
+    #%graph.y 72
     .code "
 
     @P(1)
@@ -37,7 +38,7 @@
     @P(0)
     @Type.String(mime = GLSL_FRAGMENT_MIME, template = DEFAULT_FRAGMENT_SHADER)
     @OnChange(\"updateShader\")
-    @Port(false)
+    @Config.Port(false)
     String fragment;
 
     PShader shader;
@@ -82,18 +83,18 @@ void main() \{
     .segments 4.003458250864644
   }
   @ ./iterator1 core:array:iterator {
-    #%graph.x 243
-    #%graph.y 373
+    #%graph.x 290
+    #%graph.y 365
     .values [array 3 7 4 9 0]
   }
   @ ./timer1 core:timing:timer {
-    #%graph.x 117
-    #%graph.y 510
+    #%graph.x 96
+    #%graph.y 365
     .period 5
   }
   @ ./animator1 core:timing:animator {
-    #%graph.x 433
-    #%graph.y 394
+    #%graph.x 535
+    #%graph.y 294
     .code "
 
     @P(1) @Type.Number @Transient @OnChange(\"toChanged\")

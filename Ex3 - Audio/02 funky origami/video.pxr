@@ -1,19 +1,19 @@
 @ /video root:video {
-  #%pxr.format 2
   #%graph.colors Green
   #%graph.comment FUNKY ORIGAMI - video patch\n\nSingle video sketch accepts FFT data from audio\npatch and renders 3D shapes.
+  #%praxis.version 4.0.0-rc1
   .renderer OpenGL
   .width 1024
   .height 768
   @ ./output-1 video:output {
-    #%graph.x 602
+    #%graph.x 521
     #%graph.y 159
     .title "FUNKY ORIGAMI"
     .always-on-top true
   }
   @ ./fft-vis video:gl:p3d {
-    #%graph.x 232
-    #%graph.y 159
+    #%graph.x 173
+    #%graph.y 189
     .code "
 
     @In(1)
