@@ -1,0 +1,8 @@
+java-compiler-release 8
+add-libs [file-list "config/libs/*.jar"]
+
+# <<<BUILD>>>
+include [file "video.pxr"]
+
+# <<<RUN>>>
+include [file "config/video_autostart"]
